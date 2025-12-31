@@ -1,0 +1,13 @@
+{
+  "name": "HomeAssessment",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:MaciejKielb/HomeAssessment.git",
+  "author": "Maciej Kielb <maciejkielbu@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.3"
+  },
+  "scripts": {}
+}
