@@ -37,8 +37,7 @@ jobs:
             echo "❌ Browsers not found in cache. Running installation step."
           fi
 
-      - name: Install Playwright Browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
+      - name: Ensure system dependencies are installed
         run: npx playwright install --with-deps
 
       - name: Run Playwright tests
