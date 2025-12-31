@@ -21,10 +21,16 @@ Follow these steps to get your local development environment running:
     ```
 
 2.  **Install dependencies and browsers:**
+
     ```bash
     yarn install
     ```
-    _Note: The `postinstall` script will automatically download the required browser binaries (Chromium, Firefox, and WebKit) and system dependencies._
+
+3.  **Download Playwright Browsers:**
+
+    ```bash
+    npx playwright install --with-deps
+    ```
 
 ## 🧪 Running Tests
 
@@ -48,11 +54,6 @@ You can use the following commands to execute tests:
   ```bash
   yarn test:report
   ```
-- **Automatic Browser Installation:**
-  ```bash
-  yarn postinstall
-  ```
-  _After running this command, the `postinstall` script will automatically download the required browsers (Chromium, Firefox, WebKit)._
 
 ## ⚙️ CI/CD & Caching
 

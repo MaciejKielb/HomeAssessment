@@ -28,12 +28,21 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
 
+      - name: Log cache status
+        run: |
+          echo "Cache Hit Status: ${{ steps.playwright-cache.outputs.cache-hit }}"
+          if [ "${{ steps.playwright-cache.outputs.cache-hit }}" == "true" ]; then
+            echo "✅ Browsers were found in cache. Skipping installation."
+          else
+            echo "❌ Browsers not found in cache. Running installation step."
+          fi
+
       - name: Install Playwright Browsers
-        run: yarn playwright install --with-deps
         if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps
 
       - name: Run Playwright tests
-        run: yarn playwright test
+        run: yarn test
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
