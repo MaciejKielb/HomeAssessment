@@ -35,9 +35,9 @@ jobs:
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ hashFiles('package.json', 'package-lock.json') }}-${{ github.ref_name }}
+          key: ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ hashFiles('package.json', 'yarn.lock') }}-${{ github.ref_name }}
           restore-keys: |
-            ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ hashFiles('package.json', 'package-lock.json') }}-
+            ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-${{ hashFiles('package.json', 'yarn.lock') }}-
             ${{ runner.os }}-playwright-${{ steps.pw-version.outputs.version }}-
             ${{ runner.os }}-playwright-
 
