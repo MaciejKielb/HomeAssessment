@@ -26,9 +26,7 @@ jobs:
       - name: Get Playwright version
         id: pw-version
         run: |
-          VERSION=$(node -e "console.log(require('./package.json').dependencies['@playwright/test'])")
-          CLEAN_VERSION=$(echo "$VERSION" | tr -d '^~')
-          echo "version=$CLEAN_VERSION" >> $GITHUB_OUTPUT
+          echo "version=$(npx playwright --version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
