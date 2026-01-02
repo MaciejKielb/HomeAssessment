@@ -26,7 +26,7 @@ jobs:
       - name: Get Playwright version
         id: pw-version
         run: |
-          echo "version=$(npx playwright --version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
+          echo "version=$(yarn playwright --version | cut -d' ' -f2)" >> $GITHUB_OUTPUT
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4
