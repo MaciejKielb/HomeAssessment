@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
-import { testData } from '../data/test-data';
-import { WalkInBathFormPage } from '../pages/walk-in-bath-form.page';
+import { testData } from '@data/test-data';
+import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
 test.describe('Walk-In Bath Form - Critical Tests', () => {
   test.beforeEach(async ({ page }) => {
