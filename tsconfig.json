@@ -11,11 +11,12 @@
     "resolveJsonModule": true,
     "moduleResolution": "node",
     "baseUrl": ".",
-    "paths": {
-      "@pages/*": ["tests/pages/*"],
-      "@data/*": ["tests/data/*"],
-      "@e2e/*": ["tests/e2e/*"]
-    }
+          "paths": {
+            "@pages/*": ["tests/pages/*"],
+            "@data/*": ["tests/data/*"],
+            "@e2e/*": ["tests/e2e/*"],
+            "@helpers/*": ["tests/helpers/*"]
+          }
   },
   "include": ["tests/**/*"],
   "exclude": ["node_modules"]

@@ -6,3 +6,8 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+# Screenshots (automatically generated on test failures)
+*.png
+*.jpg
+*.jpeg

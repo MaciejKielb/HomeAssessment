@@ -15,6 +15,11 @@ export const testData = {
       tooShort: '1234', // Less than 5 digits
       tooLong: '123456', // More than 5 digits
     },
+    email: {
+      missingAt: 'invalid.email.com', // Missing @ symbol
+      missingDomain: 'invalid-email@', // Missing domain
+      missingTld: 'invalid-email@domain', // Missing TLD
+    },
   },
 } as const;
 
@@ -36,6 +41,28 @@ export const zipCodeTestCases = [
   },
 ];
 
+export const emailTestCases = [
+  {
+    email: testData.valid.email,
+    description: 'valid format',
+    shouldProceed: true,
+  },
+  {
+    email: testData.invalid.email.missingAt,
+    description: 'missing @ symbol',
+    shouldProceed: false,
+  },
+  {
+    email: testData.invalid.email.missingDomain,
+    description: 'missing domain',
+    shouldProceed: false,
+  },
+  {
+    email: testData.invalid.email.missingTld,
+    description: 'missing TLD',
+    shouldProceed: false,
+  },
+];
 
 
 
