@@ -128,7 +128,6 @@ export class WalkInBathFormPage {
   }
 
   async verifyPhoneFormatted() {
-    // Verify phone number was formatted correctly to (XXX)XXX-XXXX format
     await expect(this.phoneInput).toHaveValue(/^\(\d{3}\)\d{3}-\d{4}$/);
   }
 
@@ -138,33 +137,27 @@ export class WalkInBathFormPage {
   }
 
   async verifyRedirectToThankYouPage() {
-    // Verify redirect to Thank you page
     await expect(this.page).toHaveURL(/\/thankyou/i);
     
-    // Verify page content
     const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
     await expect(thankYouHeading).toBeVisible();
     await expect(thankYouHeading).toContainText(/thank you/i);
   }
 
   async expectZipCodeSuccess() {
-    // Valid ZIP code should proceed to next step
     await expect(this.independenceCheckbox).toBeVisible();
     // Verify error message is not visible (important for UX)
     await expect(this.zipCodeError).toBeHidden();
   }
 
   async expectZipCodeFailure(zipCode: string) {
-    // Invalid ZIP code should not proceed - form stays on ZIP step
     await expect(this.zipInput).toBeVisible();
     await expect(this.independenceCheckbox).not.toBeVisible();
     await expect(this.zipInput).toHaveValue(zipCode);
-    // Verify frontend error message appears
     await expect(this.zipCodeError).toBeVisible();
   }
 
   async expectEmailSuccess() {
-    // Valid email should proceed to phone step
     await expect(this.phoneInput).toBeVisible();
   }
 

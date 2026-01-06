@@ -79,14 +79,10 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
     test.fixme(`should validate email format - ${testCase.description}`, async ({ page }) => {
       const formPage = new WalkInBathFormPage(page);
 
-      // Navigate to contact info step (DRY: extracted to method)
       await formPage.navigateToContactInfoStep();
-
-      // Enter name and test email
       await formPage.enterContactInfo(testData.valid.name, testCase.email);
       await formPage.clickGoToEstimate();
 
-      // Decision is here - test serves as documentation
       if (testCase.shouldProceed) {
         await formPage.expectEmailSuccess();
       } else {
