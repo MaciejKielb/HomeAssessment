@@ -17,6 +17,7 @@ export class WalkInBathFormPage {
   readonly goToEstimateButton: Locator;
   readonly phoneInput: Locator;
   readonly submitButton: Locator;
+  readonly zipCodeError: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -35,6 +36,7 @@ export class WalkInBathFormPage {
     this.goToEstimateButton = this.form.getByRole('button', { name: /go to estimate/i });
     this.phoneInput = this.form.locator('input[name="phone"]');
     this.submitButton = this.form.getByRole('button', { name: /submit your request/i });
+    this.zipCodeError = this.form.getByText(/wrong zip code/i);
   }
 
   async goto() {
@@ -128,6 +130,22 @@ export class WalkInBathFormPage {
     const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
     await expect(thankYouHeading).toBeVisible();
     await expect(thankYouHeading).toContainText(/thank you/i);
+  }
+
+  async expectZipCodeSuccess() {
+    // Valid ZIP code should proceed to next step
+    await expect(this.independenceCheckbox).toBeVisible();
+    // Verify error message is not visible (important for UX)
+    await expect(this.zipCodeError).toBeHidden();
+  }
+
+  async expectZipCodeFailure(zipCode: string) {
+    // Invalid ZIP code should not proceed - form stays on ZIP step
+    await expect(this.zipInput).toBeVisible();
+    await expect(this.independenceCheckbox).not.toBeVisible();
+    await expect(this.zipInput).toHaveValue(zipCode);
+    // Verify frontend error message appears
+    await expect(this.zipCodeError).toBeVisible();
   }
 }
 

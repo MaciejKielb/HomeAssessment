@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
 
-import { testData } from '@data/test-data';
+import { testData, zipCodeTestCases } from '@data/test-data';
 import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
-test.describe('Walk-In Bath Form - Critical Tests', () => {
+test.describe('Walk-In Bath Form - Critical Tests', () => {  
   test.beforeEach(async ({ page }) => {
     const formPage = new WalkInBathFormPage(page);
     await formPage.goto();
@@ -45,4 +45,24 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
     // Step 6: Verify redirect to Thank you page
     await formPage.verifyRedirectToThankYouPage();
   });
+
+  /**
+   * Test 2: Validate ZIP code contains exactly 5 digits (Equivalence Partitioning)
+   * Requirements: ZIP code must be exactly 5 digits
+   * Test cases: Valid (5 digits), Too short (< 5 digits), Too long (> 5 digits)
+   */
+  for (const testCase of zipCodeTestCases) {
+    test(`should validate ZIP code - ${testCase.description}`, async ({ page }) => {
+      const formPage = new WalkInBathFormPage(page);
+
+      await formPage.enterZipCode(testCase.zipCode);
+      await formPage.clickNext();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectZipCodeSuccess();
+      } else {
+        await formPage.expectZipCodeFailure(testCase.zipCode);
+      }
+    });
+  }
 });
