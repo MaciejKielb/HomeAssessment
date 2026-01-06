@@ -20,6 +20,10 @@ export const testData = {
       missingDomain: 'invalid-email@', // Missing domain
       missingTld: 'invalid-email@domain', // Missing TLD
     },
+    phone: {
+      tooShort: '555123456', // 9 digits (less than 10)
+      // Note: Phone input automatically truncates to 10 digits, so "too long" case is not testable
+    },
   },
 } as const;
 
@@ -64,6 +68,21 @@ export const emailTestCases = [
   },
 ];
 
-
+/**
+ * Phone validation test cases
+ * Note: "too long" case is not testable - phone input automatically truncates to 10 digits
+ */
+export const phoneTestCases = [
+  {
+    phone: testData.valid.phone,
+    description: 'valid (10 digits)',
+    shouldProceed: true,
+  },
+  {
+    phone: testData.invalid.phone.tooShort,
+    description: 'too short (9 digits)',
+    shouldProceed: false,
+  },
+];
 
 

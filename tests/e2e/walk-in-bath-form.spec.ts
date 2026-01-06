@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
 
-import { testData, zipCodeTestCases, emailTestCases } from '@data/test-data';
+import { testData, zipCodeTestCases, emailTestCases, phoneTestCases } from '@data/test-data';
 import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
 test.describe('Walk-In Bath Form - Critical Tests', () => {  
@@ -18,31 +18,25 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   }) => {
     const formPage = new WalkInBathFormPage(page);
 
-    // Step 1: Enter ZIP code
     await formPage.enterZipCode(testData.valid.zipCode);
     await formPage.clickNext();
 
-    // Step 2: Select interests
     await formPage.selectAllInterests();
     await formPage.verifyInterestsSelected();
     await formPage.clickNext();
 
-    // Step 3: Select property type
     await formPage.verifyPropertyTypeOptionsEnabled();
     await formPage.selectMobileHome();
     await formPage.verifyMobileHomeSelected();
     await formPage.clickNext();
 
-    // Step 4: Enter name and email
     await formPage.enterContactInfo(testData.valid.name, testData.valid.email);
     await formPage.clickGoToEstimate();
 
-    // Step 5: Enter phone number
     await formPage.enterPhoneNumber(testData.valid.phone);
     await formPage.verifyPhoneFormatted();
     await formPage.submitForm();
 
-    // Step 6: Verify redirect to Thank you page
     await formPage.verifyRedirectToThankYouPage();
   });
 
@@ -87,6 +81,28 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
         await formPage.expectEmailSuccess();
       } else {
         await formPage.expectEmailFailure(testCase.email);
+      }
+    });
+  }
+
+  /**
+   * Test 4: Validate phone number contains exactly 10 digits (Equivalence Partitioning)
+   * Requirements: Phone number must be exactly 10 digits
+   * Test cases: Valid (10 digits), Too short (9 digits)
+   * Note: "Too long" case is not testable - phone input automatically truncates to 10 digits
+   */
+  for (const testCase of phoneTestCases) {
+    test(`should validate phone number - ${testCase.description}`, async ({ page }) => {
+      const formPage = new WalkInBathFormPage(page);
+
+      await formPage.navigateToPhoneStep();
+      await formPage.enterPhoneNumber(testCase.phone);
+      await formPage.submitForm();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectPhoneSuccess();
+      } else {
+        await formPage.expectPhoneFailure(testCase.phone);
       }
     });
   }
