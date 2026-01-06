@@ -20,6 +20,7 @@ export class WalkInBathFormPage {
   readonly phoneInput: Locator;
   readonly submitButton: Locator;
   readonly zipCodeError: Locator;
+  readonly phoneError: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -39,6 +40,7 @@ export class WalkInBathFormPage {
     this.phoneInput = this.form.locator('input[name="phone"]');
     this.submitButton = this.form.getByRole('button', { name: /submit your request/i });
     this.zipCodeError = this.form.getByText(/wrong zip code/i);
+    this.phoneError = this.form.getByText(/wrong phone number/i);
   }
 
   async goto() {
@@ -98,6 +100,16 @@ export class WalkInBathFormPage {
     await this.clickNext();
   }
 
+  /**
+   * Navigates through form steps to reach phone step
+   * Used to avoid code duplication in phone validation tests
+   */
+  async navigateToPhoneStep(): Promise<void> {
+    await this.navigateToContactInfoStep();
+    await this.enterContactInfo(testData.valid.name, testData.valid.email);
+    await this.clickGoToEstimate();
+  }
+
   async verifyMobileHomeSelected() {
     await expect(this.ownedHouseOption).not.toBeChecked();
     await expect(this.rentalPropertyOption).not.toBeChecked();
@@ -145,18 +157,14 @@ export class WalkInBathFormPage {
   }
 
   async expectZipCodeSuccess() {
-    // Valid ZIP code should proceed to next step
     await expect(this.independenceCheckbox).toBeVisible();
-    // Verify error message is not visible (important for UX)
     await expect(this.zipCodeError).toBeHidden();
   }
 
   async expectZipCodeFailure(zipCode: string) {
-    // Invalid ZIP code should not proceed - form stays on ZIP step
     await expect(this.zipInput).toBeVisible();
     await expect(this.independenceCheckbox).not.toBeVisible();
     await expect(this.zipInput).toHaveValue(zipCode);
-    // Verify frontend error message appears
     await expect(this.zipCodeError).toBeVisible();
   }
 
@@ -171,5 +179,15 @@ export class WalkInBathFormPage {
     // If emailInput becomes hidden, form proceeded to next step (bug)
     await verifyElementRemainsVisible(this.page, this.emailInput, 1500, 200);
   }
-}
 
+  async expectPhoneSuccess() {
+    await expect(this.page).toHaveURL(/\/thankyou/i);
+    const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
+    await expect(thankYouHeading).toBeVisible();
+  }
+
+  async expectPhoneFailure(phone: string) {
+    await expect(this.phoneInput).toBeVisible();
+    await expect(this.phoneError).toBeVisible();
+  }
+}
