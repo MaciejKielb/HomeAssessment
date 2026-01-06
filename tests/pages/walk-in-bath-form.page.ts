@@ -145,15 +145,18 @@ export class WalkInBathFormPage {
   }
 
   async expectZipCodeSuccess() {
+    // Valid ZIP code should proceed to next step
     await expect(this.independenceCheckbox).toBeVisible();
     // Verify error message is not visible (important for UX)
     await expect(this.zipCodeError).toBeHidden();
   }
 
   async expectZipCodeFailure(zipCode: string) {
+    // Invalid ZIP code should not proceed - form stays on ZIP step
     await expect(this.zipInput).toBeVisible();
     await expect(this.independenceCheckbox).not.toBeVisible();
     await expect(this.zipInput).toHaveValue(zipCode);
+    // Verify frontend error message appears
     await expect(this.zipCodeError).toBeVisible();
   }
 
