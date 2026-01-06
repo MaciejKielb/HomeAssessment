@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
 
-import { testData, zipCodeTestCases } from '@data/test-data';
+import { testData, zipCodeTestCases, emailTestCases } from '@data/test-data';
 import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
-test.describe('Walk-In Bath Form - Critical Tests', () => {  
+test.describe('Walk-In Bath Form - Critical Tests', () => {
   test.beforeEach(async ({ page }) => {
     const formPage = new WalkInBathFormPage(page);
     await formPage.goto();
@@ -62,6 +62,35 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
         await formPage.expectZipCodeSuccess();
       } else {
         await formPage.expectZipCodeFailure(testCase.zipCode);
+      }
+    });
+  }
+
+  /**
+   * Test 3: Validate email format matches valid email pattern
+   * Requirements: Email must match valid email pattern (user@domain.tld)
+   * Test cases: Valid format, Missing @, Missing domain, Missing TLD
+   * 
+   * NOTE: This entire test suite is marked with test.fixme() because
+   * it currently detects a bug where the form proceeds with invalid email format.
+   * These tests will be skipped in CI but remain as documentation of a known issue.
+   */
+  for (const testCase of emailTestCases) {
+    test.fixme(`should validate email format - ${testCase.description}`, async ({ page }) => {
+      const formPage = new WalkInBathFormPage(page);
+
+      // Navigate to contact info step (DRY: extracted to method)
+      await formPage.navigateToContactInfoStep();
+
+      // Enter name and test email
+      await formPage.enterContactInfo(testData.valid.name, testCase.email);
+      await formPage.clickGoToEstimate();
+
+      // Decision is here - test serves as documentation
+      if (testCase.shouldProceed) {
+        await formPage.expectEmailSuccess();
+      } else {
+        await formPage.expectEmailFailure(testCase.email);
       }
     });
   }

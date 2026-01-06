@@ -1,4 +1,6 @@
 import { Page, Locator, expect } from '@playwright/test';
+import { testData } from '@data/test-data';
+import { verifyElementRemainsVisible } from '@helpers/wait-helpers';
 
 export class WalkInBathFormPage {
   readonly page: Page;
@@ -83,6 +85,19 @@ export class WalkInBathFormPage {
     await this.mobileHomeOption.check();
   }
 
+  /**
+   * Navigates through form steps to reach contact info step
+   * Used to avoid code duplication in email validation tests
+   */
+  async navigateToContactInfoStep(): Promise<void> {
+    await this.enterZipCode(testData.valid.zipCode);
+    await this.clickNext();
+    await this.selectAllInterests();
+    await this.clickNext();
+    await this.selectMobileHome();
+    await this.clickNext();
+  }
+
   async verifyMobileHomeSelected() {
     await expect(this.ownedHouseOption).not.toBeChecked();
     await expect(this.rentalPropertyOption).not.toBeChecked();
@@ -146,6 +161,19 @@ export class WalkInBathFormPage {
     await expect(this.zipInput).toHaveValue(zipCode);
     // Verify frontend error message appears
     await expect(this.zipCodeError).toBeVisible();
+  }
+
+  async expectEmailSuccess() {
+    // Valid email should proceed to phone step
+    await expect(this.phoneInput).toBeVisible();
+  }
+
+  async expectEmailFailure(email: string): Promise<void> {
+    // Verify form did not proceed to phone step (bug detection)
+    // Check with interval polling to catch delayed transitions
+    // If emailInput remains visible, form correctly stayed on contact info step
+    // If emailInput becomes hidden, form proceeded to next step (bug)
+    await verifyElementRemainsVisible(this.page, this.emailInput, 1500, 200);
   }
 }
 
