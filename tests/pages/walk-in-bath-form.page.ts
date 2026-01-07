@@ -25,6 +25,7 @@ export class WalkInBathFormPage {
   readonly nameFormatError: Locator;
   readonly nameFullNameError: Locator;
   readonly propertyTypeError: Locator;
+  readonly thankYouPageUrl: RegExp;
 
   constructor(page: Page) {
     this.page = page;
@@ -49,6 +50,7 @@ export class WalkInBathFormPage {
     this.nameFormatError = this.form.getByText(/your name should consist only/i);
     this.nameFullNameError = this.form.getByText(/should contain both first and last name/i);
     this.propertyTypeError = this.form.getByText(/choose one of the variants/i);
+    this.thankYouPageUrl = /\/thankyou/i;
   }
 
   async goto() {
@@ -196,16 +198,29 @@ export class WalkInBathFormPage {
   }
 
   async verifyRedirectToThankYouPage() {
-    await expect(this.page).toHaveURL(/\/thankyou/i);
+    await expect(this.page).toHaveURL(this.thankYouPageUrl);
     
     const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
     await expect(thankYouHeading).toBeVisible();
     await expect(thankYouHeading).toContainText(/thank you/i);
   }
 
+  /**
+   * Verify that form did not redirect to thank you page
+   * Used to verify form stayed on current step after validation failure
+   */
+  async verifyNotOnThankYouPage() {
+    await expect(this.page).not.toHaveURL(this.thankYouPageUrl);
+  }
+
   async expectZipCodeSuccess() {
+    // Verify form proceeded to interest step (behavior: user sees next step with all checkboxes visible)
     await expect(this.independenceCheckbox).toBeVisible();
-    await expect(this.zipCodeError).toBeHidden();
+    await expect(this.safetyCheckbox).toBeVisible();
+    await expect(this.therapyCheckbox).toBeVisible();
+    await expect(this.otherCheckbox).toBeVisible();
+    // Verify ZIP code was accepted (no error message visible to user)
+    await expect(this.zipCodeError).not.toBeVisible();
   }
 
   async expectZipCodeFailure(zipCode: string) {
@@ -216,7 +231,10 @@ export class WalkInBathFormPage {
   }
 
   async expectEmailSuccess() {
+    // Verify form proceeded to phone step (behavior: user sees phone input on next step)
     await expect(this.phoneInput).toBeVisible();
+    // Verify email was accepted (no error messages visible to user)
+    // Note: Email errors are not displayed, form just doesn't proceed if invalid
   }
 
   async expectEmailFailure(email: string): Promise<void> {
@@ -228,14 +246,18 @@ export class WalkInBathFormPage {
   }
 
   async expectPhoneSuccess() {
-    await expect(this.page).toHaveURL(/\/thankyou/i);
+    await expect(this.page).toHaveURL(this.thankYouPageUrl);
     const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
     await expect(thankYouHeading).toBeVisible();
   }
 
   async expectPhoneFailure(phone: string) {
+    // Verify form stayed on phone step (behavior: phone input is still visible to user)
     await expect(this.phoneInput).toBeVisible();
+    // Verify error message is displayed to user (phoneError locator already contains the text pattern)
     await expect(this.phoneError).toBeVisible();
+    // Verify form did not proceed to thank you page (behavior: user is still on phone step)
+    await this.verifyNotOnThankYouPage();
   }
 
   /**
@@ -260,10 +282,15 @@ export class WalkInBathFormPage {
 
   /**
    * Verify that form proceeds to phone step when name is valid
-   * Expected: Phone input should be visible
+   * Expected: Phone input should be visible on next step, no error messages visible
    */
   async expectNameSuccess() {
+    // Verify form proceeded to phone step (behavior: user sees phone input on next step)
     await expect(this.phoneInput).toBeVisible();
+    // Verify name was accepted (no error messages visible to user)
+    await expect(this.missingNameError).not.toBeVisible();
+    await expect(this.nameFormatError).not.toBeVisible();
+    await expect(this.nameFullNameError).not.toBeVisible();
   }
 
   /**
