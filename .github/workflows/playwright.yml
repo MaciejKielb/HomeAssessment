@@ -78,12 +78,26 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
-      - name: Upload test results (JUnit)
+      - name: Prepare JUnit file with shard identifier
         if: ${{ !cancelled() }}
+        id: junit-file
+        run: |
+          if [ -f test-results/junit.xml ]; then
+            SHARD_NAME=$(echo "${{ matrix.shard }}" | tr '/' '-')
+            JUNIT_FILE="test-results/junit-shard-${SHARD_NAME}.xml"
+            mv test-results/junit.xml "$JUNIT_FILE"
+            echo "file=$JUNIT_FILE" >> $GITHUB_OUTPUT
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Upload test results (JUnit)
+        if: ${{ !cancelled() && steps.junit-file.outputs.exists == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: test-results-junit-${{ steps.artifact-name.outputs.name }}
-          path: test-results/junit.xml
+          path: ${{ steps.junit-file.outputs.file }}
           retention-days: 30
           if-no-files-found: ignore
 
@@ -105,7 +119,7 @@ jobs:
       - name: Publish JUnit Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: test-results/**/junit.xml
+          files: test-results/junit-*.xml
           check_name: Playwright Test Results
           comment_mode: create new
           report_individual_runs: true
