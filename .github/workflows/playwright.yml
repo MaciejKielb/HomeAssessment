@@ -121,6 +121,6 @@ jobs:
         with:
           files: test-results/junit-*.xml
           check_name: Playwright Test Results
-          comment_mode: create new
+          comment_mode: always
           report_individual_runs: true
-          dedup_classes_by_file_name: true
+          deduplicate_classes_by_file_name: true
