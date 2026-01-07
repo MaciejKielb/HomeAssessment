@@ -87,11 +87,25 @@ jobs:
           retention-days: 30
           if-no-files-found: ignore
 
+  publish-results:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ !cancelled() && always() }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download all JUnit test results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: test-results-junit-*
+          merge-multiple: true
+          path: test-results
+
       - name: Publish JUnit Test Results
-        if: ${{ !cancelled() }}
         uses: EnricoMi/publish-unit-test-result-action@v2
         with:
-          files: test-results/junit.xml
+          files: test-results/**/junit.xml
           check_name: Playwright Test Results
           comment_mode: create new
           report_individual_runs: true
