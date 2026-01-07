@@ -1,15 +1,8 @@
-import { test, expect } from '@playwright/test';
-import { VideoPage } from '@pages/video.page';
+import { test, expect } from '@fixtures';
 
 test.describe('Video Playback Tests', () => {
-  let videoPage: VideoPage;
 
-  test.beforeEach(async ({ page }) => {
-    videoPage = new VideoPage(page);
-    await videoPage.goto();
-  });
-
-  test('should display videos visible to users', async () => {
+  test('should display videos visible to users', async ({ videoPage }) => {
     const videoCount = await videoPage.getVideoCount();
     expect(videoCount).toBeGreaterThan(0);
 

@@ -15,7 +15,8 @@
             "@pages/*": ["tests/pages/*"],
             "@data/*": ["tests/data/*"],
             "@e2e/*": ["tests/e2e/*"],
-            "@helpers/*": ["tests/helpers/*"]
+            "@helpers/*": ["tests/helpers/*"],
+            "@fixtures": ["tests/fixtures"]
           }
   },
   "include": ["tests/**/*"],

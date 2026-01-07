@@ -1,22 +1,15 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '@fixtures';
 
 import { testData, zipCodeTestCases, emailTestCases, phoneTestCases, nameTestCases } from '@data/test-data';
-import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
 test.describe('Walk-In Bath Form - Critical Tests', () => {
-  let formPage: WalkInBathFormPage;
-
-  test.beforeEach(async ({ page }) => {
-    formPage = new WalkInBathFormPage(page);
-    await formPage.goto();
-  });
 
   /**
    * Test 1: Complete multi-step form submission flow with valid data
    * Requirements: All fields required, ZIP (5 digits), Email (valid format), Phone (10 digits), Redirect to Thank you page
    */
   test('should complete full form submission flow with valid data and redirect to Thank you page', async ({
-    page,
+    formPage,
   }) => {
 
     await formPage.enterZipCode(testData.valid.zipCode);
@@ -47,7 +40,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Valid (5 digits), Too short (< 5 digits), Too long (> 5 digits)
    */
   for (const testCase of zipCodeTestCases) {
-    test(`should validate ZIP code - ${testCase.description}`, async ({ page }) => {
+    test(`should validate ZIP code - ${testCase.description}`, async ({ formPage }) => {
 
       await formPage.enterZipCode(testCase.zipCode);
       await formPage.clickNext();
@@ -70,7 +63,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * These tests will be skipped in CI but remain as documentation of a known issue.
    */
   for (const testCase of emailTestCases) {
-    test.fixme(`should validate email format - ${testCase.description}`, async ({ page }) => {
+    test.fixme(`should validate email format - ${testCase.description}`, async ({ formPage }) => {
 
       await formPage.navigateToContactInfoStep();
       await formPage.enterContactInfo(testData.valid.name, testCase.email);
@@ -91,7 +84,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Note: "Too long" case is not testable - phone input automatically truncates to 10 digits
    */
   for (const testCase of phoneTestCases) {
-    test(`should validate phone number - ${testCase.description}`, async ({ page }) => {
+    test(`should validate phone number - ${testCase.description}`, async ({ formPage }) => {
 
       await formPage.navigateToPhoneStep();
       await formPage.enterPhoneNumber(testCase.phone);
@@ -115,7 +108,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * - Test will be enabled once the bug is fixed
    * - Bug is documented in DEFECTS.md
    */
-  test.fixme('should block progression when no interest checkbox is selected', async ({ page }) => {
+  test.fixme('should block progression when no interest checkbox is selected', async ({ formPage }) => {
 
     await formPage.enterZipCode(testData.valid.zipCode);
     await formPage.clickNext();
@@ -130,7 +123,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Empty, First name only, Full name, With numbers, With invalid special characters
    */
   for (const testCase of nameTestCases) {
-    test(`should validate name field - ${testCase.description}`, async ({ page }) => {
+    test(`should validate name field - ${testCase.description}`, async ({ formPage }) => {
 
       await formPage.navigateToContactInfoStep();
       await formPage.enterContactInfo(testCase.name, testData.valid.email);
@@ -155,7 +148,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Requirements: All fields are required (property type must be selected)
    * Expected: Form should block progression to next step if no property type radio button is selected
    */
-  test('should block progression when no property type radio button is selected', async ({ page }) => {
+  test('should block progression when no property type radio button is selected', async ({ formPage }) => {
 
     await formPage.navigateToPropertyTypeStep();
     await formPage.verifyPropertyTypeStep();
