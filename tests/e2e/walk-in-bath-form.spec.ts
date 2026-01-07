@@ -1,11 +1,13 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-import { testData, zipCodeTestCases, emailTestCases, phoneTestCases } from '@data/test-data';
+import { testData, zipCodeTestCases, emailTestCases, phoneTestCases, nameTestCases } from '@data/test-data';
 import { WalkInBathFormPage } from '@pages/walk-in-bath-form.page';
 
-test.describe('Walk-In Bath Form - Critical Tests', () => {  
+test.describe('Walk-In Bath Form - Critical Tests', () => {
+  let formPage: WalkInBathFormPage;
+
   test.beforeEach(async ({ page }) => {
-    const formPage = new WalkInBathFormPage(page);
+    formPage = new WalkInBathFormPage(page);
     await formPage.goto();
   });
 
@@ -16,7 +18,6 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   test('should complete full form submission flow with valid data and redirect to Thank you page', async ({
     page,
   }) => {
-    const formPage = new WalkInBathFormPage(page);
 
     await formPage.enterZipCode(testData.valid.zipCode);
     await formPage.clickNext();
@@ -47,7 +48,6 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    */
   for (const testCase of zipCodeTestCases) {
     test(`should validate ZIP code - ${testCase.description}`, async ({ page }) => {
-      const formPage = new WalkInBathFormPage(page);
 
       await formPage.enterZipCode(testCase.zipCode);
       await formPage.clickNext();
@@ -71,7 +71,6 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    */
   for (const testCase of emailTestCases) {
     test.fixme(`should validate email format - ${testCase.description}`, async ({ page }) => {
-      const formPage = new WalkInBathFormPage(page);
 
       await formPage.navigateToContactInfoStep();
       await formPage.enterContactInfo(testData.valid.name, testCase.email);
@@ -93,7 +92,6 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    */
   for (const testCase of phoneTestCases) {
     test(`should validate phone number - ${testCase.description}`, async ({ page }) => {
-      const formPage = new WalkInBathFormPage(page);
 
       await formPage.navigateToPhoneStep();
       await formPage.enterPhoneNumber(testCase.phone);
@@ -106,4 +104,62 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
       }
     });
   }
+
+  /**
+   * Test 5: Validate interest checkboxes - at least one must be selected
+   * Requirements: At least one interest checkbox must be selected (business requirement)
+   * Expected: Form should block progression to next step if no checkbox is selected
+   * 
+   * NOTE: This test is marked with test.fixme() because it detects a bug:
+   * - Form allows progression without selecting any checkbox (should block progression)
+   * - Test will be enabled once the bug is fixed
+   * - Bug is documented in DEFECTS.md
+   */
+  test.fixme('should block progression when no interest checkbox is selected', async ({ page }) => {
+
+    await formPage.enterZipCode(testData.valid.zipCode);
+    await formPage.clickNext();
+    await formPage.verifyInterestStep();
+    await formPage.clickNext();
+    await formPage.expectFormStaysOnInterestStep();
+  });
+
+  /**
+   * Test 6: Validate name field - required and format validation
+   * Requirements: All text fields are mandatory, name should consist only of latin letters, apostrophes, underscores, dots and dashes
+   * Test cases: Empty, First name only, Full name, With numbers, With invalid special characters
+   */
+  for (const testCase of nameTestCases) {
+    test(`should validate name field - ${testCase.description}`, async ({ page }) => {
+
+      await formPage.navigateToContactInfoStep();
+      await formPage.enterContactInfo(testCase.name, testData.valid.email);
+      await formPage.clickGoToEstimate();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectNameSuccess();
+      } else {
+        if (testCase.errorType === 'required') {
+          await formPage.expectFormStaysOnContactInfoStepWithNameError();
+        } else if (testCase.errorType === 'fullName') {
+          await formPage.expectFormStaysOnContactInfoStepWithNameFullNameError();
+        } else {
+          await formPage.expectFormStaysOnContactInfoStepWithNameFormatError();
+        }
+      }
+    });
+  }
+
+  /**
+   * Test 7: Validate property type radio button is required
+   * Requirements: All fields are required (property type must be selected)
+   * Expected: Form should block progression to next step if no property type radio button is selected
+   */
+  test('should block progression when no property type radio button is selected', async ({ page }) => {
+
+    await formPage.navigateToPropertyTypeStep();
+    await formPage.verifyPropertyTypeStep();
+    await formPage.clickNext();
+    await formPage.expectFormStaysOnPropertyTypeStep();
+  });
 });

@@ -21,6 +21,10 @@ export class WalkInBathFormPage {
   readonly submitButton: Locator;
   readonly zipCodeError: Locator;
   readonly phoneError: Locator;
+  readonly missingNameError: Locator;
+  readonly nameFormatError: Locator;
+  readonly nameFullNameError: Locator;
+  readonly propertyTypeError: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -41,6 +45,10 @@ export class WalkInBathFormPage {
     this.submitButton = this.form.getByRole('button', { name: /submit your request/i });
     this.zipCodeError = this.form.getByText(/wrong zip code/i);
     this.phoneError = this.form.getByText(/wrong phone number/i);
+    this.missingNameError = this.form.getByText(/please enter your name/i);
+    this.nameFormatError = this.form.getByText(/your name should consist only/i);
+    this.nameFullNameError = this.form.getByText(/should contain both first and last name/i);
+    this.propertyTypeError = this.form.getByText(/choose one of the variants/i);
   }
 
   async goto() {
@@ -68,6 +76,26 @@ export class WalkInBathFormPage {
     await this.otherCheckbox.check();
   }
 
+  /**
+   * Select at least one interest checkbox (business requirement: at least one must be selected)
+   * Used when testing accessibility or when only minimum requirement is needed
+   */
+  async selectAtLeastOneInterest() {
+    await expect(this.independenceCheckbox).toBeVisible();
+    await this.independenceCheckbox.check();
+  }
+
+  /**
+   * Verify that we're on interest step
+   * Checks that all interest checkboxes are visible
+   */
+  async verifyInterestStep() {
+    await expect(this.independenceCheckbox).toBeVisible();
+    await expect(this.safetyCheckbox).toBeVisible();
+    await expect(this.therapyCheckbox).toBeVisible();
+    await expect(this.otherCheckbox).toBeVisible();
+  }
+
   async verifyInterestsSelected() {
     await expect(this.independenceCheckbox).toBeChecked();
     await expect(this.safetyCheckbox).toBeChecked();
@@ -82,9 +110,28 @@ export class WalkInBathFormPage {
   }
 
   async selectMobileHome() {
-    await this.ownedHouseOption.check();
-    await this.rentalPropertyOption.check();
     await this.mobileHomeOption.check();
+  }
+
+  /**
+   * Navigates through form steps to reach property type step
+   * Used to avoid code duplication in accessibility tests
+   */
+  async navigateToPropertyTypeStep(): Promise<void> {
+    await this.enterZipCode(testData.valid.zipCode);
+    await this.clickNext();
+    await this.selectAtLeastOneInterest();
+    await this.clickNext();
+  }
+
+  /**
+   * Verify that we're on property type step
+   * Checks that all property type radio buttons are visible
+   */
+  async verifyPropertyTypeStep() {
+    await expect(this.ownedHouseOption).toBeVisible();
+    await expect(this.rentalPropertyOption).toBeVisible();
+    await expect(this.mobileHomeOption).toBeVisible();
   }
 
   /**
@@ -190,4 +237,69 @@ export class WalkInBathFormPage {
     await expect(this.phoneInput).toBeVisible();
     await expect(this.phoneError).toBeVisible();
   }
+
+  /**
+   * Verify that form stays on interest step when no checkbox is selected
+   * Expected: Form should remain on interest step (checkboxes visible, property type step not visible)
+   */
+  async expectFormStaysOnInterestStep() {
+    await verifyElementRemainsVisible(this.page, this.independenceCheckbox, 1500, 200);
+  }
+
+  /**
+   * Verify that form stays on contact info step when name field is empty
+   * Expected: Form should remain on contact info step with error message displayed
+   */
+  async expectFormStaysOnContactInfoStepWithNameError() {
+    await expect(this.nameInput).toBeVisible();
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.missingNameError).toBeVisible();
+    // Verify that form did not proceed to phone step
+    await expect(this.phoneInput).not.toBeVisible();
+  }
+
+  /**
+   * Verify that form proceeds to phone step when name is valid
+   * Expected: Phone input should be visible
+   */
+  async expectNameSuccess() {
+    await expect(this.phoneInput).toBeVisible();
+  }
+
+  /**
+   * Verify that form stays on contact info step when name format is invalid
+   * Expected: Form should remain on contact info step with format error message displayed
+   */
+  async expectFormStaysOnContactInfoStepWithNameFormatError() {
+    await expect(this.nameInput).toBeVisible();
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.nameFormatError).toBeVisible();
+    // Verify that form did not proceed to phone step
+    await expect(this.phoneInput).not.toBeVisible();
+  }
+
+  /**
+   * Verify that form stays on contact info step when name doesn't contain both first and last name
+   * Expected: Form should remain on contact info step with full name error message displayed
+   */
+  async expectFormStaysOnContactInfoStepWithNameFullNameError() {
+    await expect(this.nameInput).toBeVisible();
+    await expect(this.emailInput).toBeVisible();
+    await expect(this.nameFullNameError).toBeVisible();
+    // Verify that form did not proceed to phone step
+    await expect(this.phoneInput).not.toBeVisible();
+  }
+
+  /**
+   * Verify that form stays on property type step when no radio button is selected
+   * Expected: Form should remain on property type step (radio buttons visible, contact info step not visible)
+   */
+  async expectFormStaysOnPropertyTypeStep() {
+    await expect(this.ownedHouseOption).toBeVisible();
+    await expect(this.propertyTypeError).toBeVisible();
+    // Verify that form did not proceed to contact info step
+    await expect(this.nameInput).not.toBeVisible();
+    await expect(this.emailInput).not.toBeVisible();
+  }
+
 }

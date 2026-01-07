@@ -85,4 +85,38 @@ export const phoneTestCases = [
   },
 ];
 
+/**
+ * Name validation test cases
+ */
+export const nameTestCases = [
+  {
+    name: '', // Empty
+    description: 'empty',
+    shouldProceed: false,
+    errorType: 'required',
+  },
+  {
+    name: 'Joe', // First name only
+    description: 'first name only',
+    shouldProceed: false,
+    errorType: 'fullName', // Form requires both first and last name
+  },
+  {
+    name: 'Joe Doe', // First and last name
+    description: 'first and last name',
+    shouldProceed: true,
+  },
+  {
+    name: 'Joe Michael Doe', // Full name
+    description: 'full name',
+    shouldProceed: true,
+  },
+  {
+    name: 'Joe123@Doe', // Invalid format (numbers and special characters)
+    description: 'with invalid format (numbers and special characters)',
+    shouldProceed: false,
+    errorType: 'format',
+  },
+];
+
 
