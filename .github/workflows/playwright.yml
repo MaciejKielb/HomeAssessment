@@ -68,3 +68,31 @@ jobs:
           name: ${{ steps.artifact-name.outputs.name }}
           path: playwright-report/
           retention-days: 30
+
+      - name: Upload test results (JSON)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-json-${{ steps.artifact-name.outputs.name }}
+          path: test-results/results.json
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Upload test results (JUnit)
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-junit-${{ steps.artifact-name.outputs.name }}
+          path: test-results/junit.xml
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Publish JUnit Test Results
+        if: ${{ !cancelled() }}
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        with:
+          files: test-results/junit.xml
+          check_name: Playwright Test Results
+          comment_mode: create new
+          report_individual_runs: true
+          dedup_classes_by_file_name: true
