@@ -57,6 +57,7 @@ jobs:
 
       - name: Prepare artifact name
         id: artifact-name
+        if: ${{ !cancelled() }}
         run: |
           SHARD_NAME=$(echo "${{ matrix.shard }}" | tr '/' '-')
           echo "name=playwright-report-shard-${SHARD_NAME}" >> $GITHUB_OUTPUT
