@@ -17,7 +17,7 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
+  /* Retry on CI only - helps with flaky tests */
   retries: process.env.CI ? 2 : 0,
   /* Optimize workers on CI - use 4 workers for parallel execution */
   workers: process.env.CI ? 4 : undefined,
@@ -33,6 +33,9 @@ export default defineConfig({
     
     /* Take screenshot only on failure */
     screenshot: 'only-on-failure',
+    
+    /* Record video only on failure for debugging */
+    video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
