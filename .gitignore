@@ -7,6 +7,11 @@ node_modules/
 /playwright/.cache/
 /playwright/.auth/
 
+# Environment variables
+.env
+.env.local
+.env.*.local
+
 # Screenshots (automatically generated on test failures)
 *.png
 *.jpg

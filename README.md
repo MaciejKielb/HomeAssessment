@@ -31,6 +31,17 @@ Follow these steps to get your local development environment running:
 
     > `--with-deps` ensures all system dependencies required by Playwright are installed.
 
+3.  **Configure environment variables (optional):**
+
+    ```bash
+    cp .env.example .env
+    ```
+
+    Edit `.env` file to override default configuration:
+    - `BASE_URL` - Base URL for the application under test (default: `https://test-qa.capslock.global`)
+    
+    > If `.env` file is not present, tests will use default values from `playwright.config.ts`
+
 ## 🧪 Running Tests
 
 You can use the following commands to execute tests:
