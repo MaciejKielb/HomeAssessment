@@ -55,9 +55,15 @@ jobs:
       - name: Run Playwright tests
         run: yarn test --shard=${{ matrix.shard }}
 
+      - name: Prepare artifact name
+        id: artifact-name
+        run: |
+          SHARD_NAME=$(echo "${{ matrix.shard }}" | tr '/' '-')
+          echo "name=playwright-report-shard-${SHARD_NAME}" >> $GITHUB_OUTPUT
+
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report-shard-${{ matrix.shard }}
+          name: ${{ steps.artifact-name.outputs.name }}
           path: playwright-report/
           retention-days: 30
