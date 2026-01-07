@@ -112,8 +112,8 @@ export const nameTestCases = [
     shouldProceed: true,
   },
   {
-    name: 'Joe123@Doe', // Invalid format (numbers and special characters)
-    description: 'with invalid format (numbers and special characters)',
+    name: 'Joe D0e', // Invalid format (number: 0 instead of o - natural typing error)
+    description: 'with invalid format (number)',
     shouldProceed: false,
     errorType: 'format',
   },
