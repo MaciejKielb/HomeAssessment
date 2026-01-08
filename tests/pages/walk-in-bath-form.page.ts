@@ -1,35 +1,57 @@
-import { Page, Locator, expect } from '@playwright/test';
-import { testData } from '@data/test-data';
-import { verifyElementRemainsVisible } from '@helpers/wait-helpers';
+import { Page, Locator } from '@playwright/test';
+import { FormActions, InterestType, PropertyType } from './form-actions';
+import { FormAssertions } from './form-assertions';
+import { FormNavigation } from './form-navigation';
 
+/**
+ * Walk-In Bath Form Page Object Model
+ * Orchestrates form interactions by delegating to specialized modules
+ */
 export class WalkInBathFormPage {
   readonly page: Page;
   readonly form: Locator;
+  
+  // Form Input Locators
   readonly zipInput: Locator;
+  readonly nameInput: Locator;
+  readonly emailInput: Locator;
+  readonly phoneInput: Locator;
+  
+  // Button Locators
   readonly nextButton: Locator;
+  readonly goToEstimateButton: Locator;
+  readonly submitButton: Locator;
+  
+  // Interest Checkbox Locators
   readonly independenceCheckbox: Locator;
   readonly safetyCheckbox: Locator;
   readonly therapyCheckbox: Locator;
   readonly otherCheckbox: Locator;
+  
+  // Property Type Radio Button Locators
   readonly ownedHouseOption: Locator;
   readonly rentalPropertyOption: Locator;
   readonly mobileHomeOption: Locator;
-  readonly nameInput: Locator;
-  readonly emailInput: Locator;
-  readonly goToEstimateButton: Locator;
-  readonly phoneInput: Locator;
-  readonly submitButton: Locator;
+  
+  // Error Message Locators
   readonly zipCodeError: Locator;
   readonly phoneError: Locator;
   readonly missingNameError: Locator;
   readonly nameFormatError: Locator;
   readonly nameFullNameError: Locator;
   readonly propertyTypeError: Locator;
+  
+  // URL Patterns
   readonly thankYouPageUrl: RegExp;
+
+  private readonly actions: FormActions;
+  private readonly assertions: FormAssertions;
+  private readonly navigation: FormNavigation;
 
   constructor(page: Page) {
     this.page = page;
     this.form = page.locator('#form-container-1');
+    
     this.zipInput = this.form.getByRole('textbox', { name: /enter zip code/i });
     this.nextButton = this.form.getByRole('button', { name: /next/i });
     this.independenceCheckbox = this.form.getByText(/independence/i);
@@ -51,348 +73,279 @@ export class WalkInBathFormPage {
     this.nameFullNameError = this.form.getByText(/should contain both first and last name/i);
     this.propertyTypeError = this.form.getByText(/choose one of the variants/i);
     this.thankYouPageUrl = /\/thankyou/i;
+
+    this.actions = new FormActions(
+      this.zipInput,
+      this.nextButton,
+      this.independenceCheckbox,
+      this.safetyCheckbox,
+      this.therapyCheckbox,
+      this.otherCheckbox,
+      this.ownedHouseOption,
+      this.rentalPropertyOption,
+      this.mobileHomeOption,
+      this.nameInput,
+      this.emailInput,
+      this.goToEstimateButton,
+      this.phoneInput,
+      this.submitButton,
+    );
+
+    this.assertions = new FormAssertions(
+      this.page,
+      this.zipInput,
+      this.independenceCheckbox,
+      this.safetyCheckbox,
+      this.therapyCheckbox,
+      this.otherCheckbox,
+      this.ownedHouseOption,
+      this.rentalPropertyOption,
+      this.mobileHomeOption,
+      this.nameInput,
+      this.emailInput,
+      this.phoneInput,
+      this.zipCodeError,
+      this.phoneError,
+      this.missingNameError,
+      this.nameFormatError,
+      this.nameFullNameError,
+      this.propertyTypeError,
+      this.thankYouPageUrl,
+    );
+
+    this.navigation = new FormNavigation(this.actions);
   }
+
+  // ============================================================================
+  // Navigation
+  // ============================================================================
 
   async goto() {
     await this.page.goto('/');
     await this.page.waitForLoadState('load');
   }
 
+  // ============================================================================
+  // ZIP Code Step Actions
+  // ============================================================================
+
   async enterZipCode(zipCode: string) {
-    await this.zipInput.fill(zipCode);
+    return this.actions.enterZipCode(zipCode);
   }
 
   async clickNext() {
-    await this.nextButton.click();
+    return this.actions.clickNext();
   }
+
+  // ============================================================================
+  // Interest Checkbox Step Actions
+  // ============================================================================
 
   async selectAllInterests() {
-    // Wait for checkboxes to be visible and enabled before clicking (important for Firefox)
-    await expect(this.independenceCheckbox).toBeVisible();
-    await this.independenceCheckbox.check();
-    await expect(this.safetyCheckbox).toBeVisible();
-    await this.safetyCheckbox.check();
-    await expect(this.therapyCheckbox).toBeVisible();
-    await this.therapyCheckbox.check();
-    await expect(this.otherCheckbox).toBeVisible();
-    await this.otherCheckbox.check();
+    return this.actions.selectAllInterests();
   }
 
-  /**
-   * Select at least one interest checkbox (business requirement: at least one must be selected)
-   * Used when testing accessibility or when only minimum requirement is needed
-   */
   async selectAtLeastOneInterest() {
-    await expect(this.independenceCheckbox).toBeVisible();
-    await this.independenceCheckbox.check();
+    return this.actions.selectAtLeastOneInterest();
   }
 
   async selectIndependenceCheckbox() {
-    await expect(this.independenceCheckbox).toBeVisible();
-    await this.independenceCheckbox.check();
+    return this.actions.selectInterestCheckbox('independence');
   }
 
   async selectSafetyCheckbox() {
-    await expect(this.safetyCheckbox).toBeVisible();
-    await this.safetyCheckbox.check();
+    return this.actions.selectInterestCheckbox('safety');
   }
 
   async selectTherapyCheckbox() {
-    await expect(this.therapyCheckbox).toBeVisible();
-    await this.therapyCheckbox.check();
+    return this.actions.selectInterestCheckbox('therapy');
   }
 
   async selectOtherCheckbox() {
-    await expect(this.otherCheckbox).toBeVisible();
-    await this.otherCheckbox.check();
+    return this.actions.selectInterestCheckbox('other');
   }
 
-  /**
-   * Verify that we're on interest step
-   * Checks that all interest checkboxes are visible
-   */
-  async verifyInterestStep() {
-    await expect(this.independenceCheckbox).toBeVisible();
-    await expect(this.safetyCheckbox).toBeVisible();
-    await expect(this.therapyCheckbox).toBeVisible();
-    await expect(this.otherCheckbox).toBeVisible();
-  }
-
-  async verifyInterestsSelected() {
-    await expect(this.independenceCheckbox).toBeChecked();
-    await expect(this.safetyCheckbox).toBeChecked();
-    await expect(this.therapyCheckbox).toBeChecked();
-    await expect(this.otherCheckbox).toBeChecked();
-  }
-
-  async verifyPropertyTypeOptionsEnabled() {
-    await expect(this.ownedHouseOption).toBeEnabled();
-    await expect(this.rentalPropertyOption).toBeEnabled();
-    await expect(this.mobileHomeOption).toBeEnabled();
-  }
+  // ============================================================================
+  // Property Type Step Actions
+  // ============================================================================
 
   async selectMobileHome() {
-    await this.mobileHomeOption.check();
+    return this.actions.selectPropertyType('mobileHome');
   }
 
   async selectOwnedHouse() {
-    await this.ownedHouseOption.check();
+    return this.actions.selectPropertyType('ownedHouse');
   }
 
   async selectRentalProperty() {
-    await this.rentalPropertyOption.check();
+    return this.actions.selectPropertyType('rentalProperty');
   }
 
-  /**
-   * Navigates through form steps to reach property type step
-   * Used to avoid code duplication in accessibility tests
-   */
-  async navigateToPropertyTypeStep(): Promise<void> {
-    await this.enterZipCode(testData.valid.zipCode);
-    await this.clickNext();
-    await this.selectAtLeastOneInterest();
-    await this.clickNext();
-  }
-
-  /**
-   * Verify that we're on property type step
-   * Checks that all property type radio buttons are visible
-   */
-  async verifyPropertyTypeStep() {
-    await expect(this.ownedHouseOption).toBeVisible();
-    await expect(this.rentalPropertyOption).toBeVisible();
-    await expect(this.mobileHomeOption).toBeVisible();
-  }
-
-  /**
-   * Navigates through form steps to reach contact info step
-   * Used to avoid code duplication in email validation tests
-   */
-  async navigateToContactInfoStep(): Promise<void> {
-    await this.enterZipCode(testData.valid.zipCode);
-    await this.clickNext();
-    await this.selectAllInterests();
-    await this.clickNext();
-    await this.selectMobileHome();
-    await this.clickNext();
-  }
-
-  /**
-   * Navigates through form steps to reach phone step
-   * Used to avoid code duplication in phone validation tests
-   */
-  async navigateToPhoneStep(): Promise<void> {
-    await this.navigateToContactInfoStep();
-    await this.enterContactInfo(testData.valid.name, testData.valid.email);
-    await this.clickGoToEstimate();
-  }
-
-  async verifyMobileHomeSelected() {
-    await expect(this.ownedHouseOption).not.toBeChecked();
-    await expect(this.rentalPropertyOption).not.toBeChecked();
-    await expect(this.mobileHomeOption).toBeChecked();
-  }
-
-  async verifyOwnedHouseSelected() {
-    await expect(this.ownedHouseOption).toBeChecked();
-    await expect(this.rentalPropertyOption).not.toBeChecked();
-    await expect(this.mobileHomeOption).not.toBeChecked();
-  }
-
-  async verifyRentalPropertySelected() {
-    await expect(this.ownedHouseOption).not.toBeChecked();
-    await expect(this.rentalPropertyOption).toBeChecked();
-    await expect(this.mobileHomeOption).not.toBeChecked();
-  }
+  // ============================================================================
+  // Contact Info Step Actions
+  // ============================================================================
 
   async enterContactInfo(name: string, email: string) {
-    await expect(this.nameInput).toBeEnabled();
-    await expect(this.emailInput).toBeEnabled();
-    await this.nameInput.fill(name);
-    await this.emailInput.fill(email);
+    return this.actions.enterContactInfo(name, email);
   }
 
   async clickGoToEstimate() {
-    await expect(this.goToEstimateButton).toBeEnabled();
-    await this.goToEstimateButton.click();
+    return this.actions.clickGoToEstimate();
   }
 
+  // ============================================================================
+  // Phone Step Actions
+  // ============================================================================
+
   async enterPhoneNumber(phone: string) {
-    await expect(this.phoneInput).toBeEnabled();
-    // Use evaluate to set value and trigger all formatting events (works in all browsers)
-    await this.phoneInput.evaluate((el: any, value: string) => {
-      el.value = value;
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-      el.dispatchEvent(new Event('blur', { bubbles: true }));
-    }, phone);
+    return this.actions.enterPhoneNumber(phone);
+  }
+
+  // ============================================================================
+  // Form Submission
+  // ============================================================================
+
+  async submitForm() {
+    return this.actions.submitForm();
+  }
+
+  // ============================================================================
+  // Navigation Methods
+  // ============================================================================
+
+  async navigateToPropertyTypeStep(): Promise<void> {
+    return this.navigation.navigateToPropertyTypeStep();
+  }
+
+  async navigateToContactInfoStep(): Promise<void> {
+    return this.navigation.navigateToContactInfoStep();
+  }
+
+  async navigateToPhoneStep(): Promise<void> {
+    return this.navigation.navigateToPhoneStep();
+  }
+
+  // ============================================================================
+  // Verification Methods
+  // ============================================================================
+
+  async verifyInterestStep() {
+    return this.assertions.verifyInterestStep();
+  }
+
+  async verifyInterestsSelected() {
+    return this.assertions.verifyInterestsSelected();
+  }
+
+  async verifyPropertyTypeOptionsEnabled() {
+    return this.assertions.verifyPropertyTypeOptionsEnabled();
+  }
+
+  async verifyPropertyTypeStep() {
+    return this.assertions.verifyPropertyTypeStep();
+  }
+
+  async verifyMobileHomeSelected() {
+    return this.assertions.verifyPropertyTypeSelected('mobileHome');
+  }
+
+  async verifyOwnedHouseSelected() {
+    return this.assertions.verifyPropertyTypeSelected('ownedHouse');
+  }
+
+  async verifyRentalPropertySelected() {
+    return this.assertions.verifyPropertyTypeSelected('rentalProperty');
   }
 
   async verifyPhoneFormatted() {
-    await expect(this.phoneInput).toHaveValue(/^\(\d{3}\)\d{3}-\d{4}$/);
-  }
-
-  async submitForm() {
-    await expect(this.submitButton).toBeEnabled();
-    await this.submitButton.click();
+    return this.assertions.verifyPhoneFormatted();
   }
 
   async verifyRedirectToThankYouPage() {
-    await expect(this.page).toHaveURL(this.thankYouPageUrl);
-    
-    const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
-    await expect(thankYouHeading).toBeVisible();
-    await expect(thankYouHeading).toContainText(/thank you/i);
+    return this.assertions.verifyRedirectToThankYouPage();
   }
 
-  /**
-   * Verify that form did not redirect to thank you page
-   * Used to verify form stayed on current step after validation failure
-   */
   async verifyNotOnThankYouPage() {
-    await expect(this.page).not.toHaveURL(this.thankYouPageUrl);
+    return this.assertions.verifyNotOnThankYouPage();
   }
+
+  // ============================================================================
+  // Expectation Methods - ZIP Code Validation
+  // ============================================================================
 
   async expectZipCodeSuccess() {
-    // Verify form proceeded to interest step (behavior: user sees next step with all checkboxes visible)
-    await expect(this.independenceCheckbox).toBeVisible();
-    await expect(this.safetyCheckbox).toBeVisible();
-    await expect(this.therapyCheckbox).toBeVisible();
-    await expect(this.otherCheckbox).toBeVisible();
-    // Verify ZIP code was accepted (no error message visible to user)
-    await expect(this.zipCodeError).not.toBeVisible();
+    return this.assertions.expectZipCodeSuccess();
   }
 
   async expectZipCodeFailure(zipCode: string) {
-    await expect(this.zipInput).toBeVisible();
-    await expect(this.independenceCheckbox).not.toBeVisible();
-    await expect(this.zipInput).toHaveValue(zipCode);
-    await expect(this.zipCodeError).toBeVisible();
+    return this.assertions.expectZipCodeFailure(zipCode);
   }
 
+  // ============================================================================
+  // Expectation Methods - Email Validation
+  // ============================================================================
+
   async expectEmailSuccess() {
-    // Verify form proceeded to phone step (behavior: user sees phone input on next step)
-    await expect(this.phoneInput).toBeVisible();
-    // Verify email was accepted (no error messages visible to user)
-    // Note: Email errors are not displayed, form just doesn't proceed if invalid
+    return this.assertions.expectEmailSuccess();
   }
 
   async expectEmailFailure(email: string): Promise<void> {
-    // Verify form did not proceed to phone step (bug detection)
-    // Check with interval polling to catch delayed transitions
-    // If emailInput remains visible, form correctly stayed on contact info step
-    // If emailInput becomes hidden, form proceeded to next step (bug)
-    await verifyElementRemainsVisible(this.page, this.emailInput, 1500, 200);
+    return this.assertions.expectEmailFailure();
   }
 
+  // ============================================================================
+  // Expectation Methods - Phone Validation
+  // ============================================================================
+
   async expectPhoneSuccess() {
-    await expect(this.page).toHaveURL(this.thankYouPageUrl);
-    const thankYouHeading = this.page.locator('h1').filter({ hasText: /thank you/i });
-    await expect(thankYouHeading).toBeVisible();
+    return this.assertions.expectPhoneSuccess();
   }
 
   async expectPhoneFailure(phone: string) {
-    // Verify form stayed on phone step (behavior: phone input is still visible to user)
-    await expect(this.phoneInput).toBeVisible();
-    // Verify error message is displayed to user (phoneError locator already contains the text pattern)
-    await expect(this.phoneError).toBeVisible();
-    // Verify form did not proceed to thank you page (behavior: user is still on phone step)
-    await this.verifyNotOnThankYouPage();
+    return this.assertions.expectPhoneFailure();
   }
 
-  /**
-   * Verify that form stays on interest step when no checkbox is selected
-   * Expected: Form should remain on interest step (checkboxes visible, property type step not visible)
-   */
+  // ============================================================================
+  // Expectation Methods - Interest Checkbox Validation
+  // ============================================================================
+
   async expectFormStaysOnInterestStep() {
-    await verifyElementRemainsVisible(this.page, this.independenceCheckbox, 1500, 200);
+    return this.assertions.expectFormStaysOnInterestStep();
   }
 
-  /**
-   * Verify that form proceeds to property type step when at least one interest checkbox is selected
-   * Expected: Property type radio buttons should be visible on next step, no error messages visible
-   */
   async expectInterestSuccess() {
-    // Verify form proceeded to property type step (behavior: user sees property type options on next step)
-    await expect(this.ownedHouseOption).toBeVisible();
-    await expect(this.rentalPropertyOption).toBeVisible();
-    await expect(this.mobileHomeOption).toBeVisible();
-    // Verify that form did not stay on interest step
-    await expect(this.independenceCheckbox).not.toBeVisible();
+    return this.assertions.expectInterestSuccess();
   }
 
-  /**
-   * Verify that form stays on contact info step when name field is empty
-   * Expected: Form should remain on contact info step with error message displayed
-   */
+  // ============================================================================
+  // Expectation Methods - Name Field Validation
+  // ============================================================================
+
   async expectFormStaysOnContactInfoStepWithNameError() {
-    await expect(this.nameInput).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.missingNameError).toBeVisible();
-    // Verify that form did not proceed to phone step
-    await expect(this.phoneInput).not.toBeVisible();
+    return this.assertions.expectFormStaysOnContactInfoStepWithNameError();
   }
 
-  /**
-   * Verify that form proceeds to phone step when name is valid
-   * Expected: Phone input should be visible on next step, no error messages visible
-   */
   async expectNameSuccess() {
-    // Verify form proceeded to phone step (behavior: user sees phone input on next step)
-    await expect(this.phoneInput).toBeVisible();
-    // Verify name was accepted (no error messages visible to user)
-    await expect(this.missingNameError).not.toBeVisible();
-    await expect(this.nameFormatError).not.toBeVisible();
-    await expect(this.nameFullNameError).not.toBeVisible();
+    return this.assertions.expectNameSuccess();
   }
 
-  /**
-   * Verify that form stays on contact info step when name format is invalid
-   * Expected: Form should remain on contact info step with format error message displayed
-   */
   async expectFormStaysOnContactInfoStepWithNameFormatError() {
-    await expect(this.nameInput).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.nameFormatError).toBeVisible();
-    // Verify that form did not proceed to phone step
-    await expect(this.phoneInput).not.toBeVisible();
+    return this.assertions.expectFormStaysOnContactInfoStepWithNameFormatError();
   }
 
-  /**
-   * Verify that form stays on contact info step when name doesn't contain both first and last name
-   * Expected: Form should remain on contact info step with full name error message displayed
-   */
   async expectFormStaysOnContactInfoStepWithNameFullNameError() {
-    await expect(this.nameInput).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    await expect(this.nameFullNameError).toBeVisible();
-    // Verify that form did not proceed to phone step
-    await expect(this.phoneInput).not.toBeVisible();
+    return this.assertions.expectFormStaysOnContactInfoStepWithNameFullNameError();
   }
 
-  /**
-   * Verify that form stays on property type step when no radio button is selected
-   * Expected: Form should remain on property type step (radio buttons visible, contact info step not visible)
-   */
+  // ============================================================================
+  // Expectation Methods - Property Type Validation
+  // ============================================================================
+
   async expectFormStaysOnPropertyTypeStep() {
-    await expect(this.ownedHouseOption).toBeVisible();
-    await expect(this.propertyTypeError).toBeVisible();
-    // Verify that form did not proceed to contact info step
-    await expect(this.nameInput).not.toBeVisible();
-    await expect(this.emailInput).not.toBeVisible();
+    return this.assertions.expectFormStaysOnPropertyTypeStep();
   }
 
-  /**
-   * Verify that form proceeds to contact info step when property type radio button is selected
-   * Expected: Contact info inputs should be visible on next step, no error messages visible
-   */
   async expectPropertyTypeSuccess() {
-    // Verify form proceeded to contact info step (behavior: user sees name and email inputs on next step)
-    await expect(this.nameInput).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
-    // Verify that form did not stay on property type step
-    await expect(this.ownedHouseOption).not.toBeVisible();
-    await expect(this.propertyTypeError).not.toBeVisible();
+    return this.assertions.expectPropertyTypeSuccess();
   }
-
 }
