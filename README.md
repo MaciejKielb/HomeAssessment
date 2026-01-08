@@ -4,6 +4,8 @@
 
 This repository contains end-to-end (E2E) tests powered by [Playwright](https://playwright.dev).
 
+> **⚠️ Important:** Test failures are **expected and intentional**. Tests were implemented according to the **requirements** (expected behavior), not the current (incorrect) behavior of the application. The tests are designed to fail until the defects in the application are fixed. This is a deliberate design choice to document and validate the correct expected behavior.
+
 > **Note:** This project uses Yarn as the package manager. While npm works equally well, Yarn was chosen based on team preferences and familiarity from professional experience. Both package managers are fully supported and interchangeable.
 
 ## 🛠️ Prerequisites
@@ -55,6 +57,8 @@ Follow these steps to get your local development environment running:
     > If `.env` file is not present, tests will use default values from `playwright.config.ts`
 
 ## 🧪 Running Tests
+
+> **Note:** Remember that test failures are expected and intentional. Tests validate the correct expected behavior according to requirements, not the current application state.
 
 You can use the following commands to execute tests:
 
