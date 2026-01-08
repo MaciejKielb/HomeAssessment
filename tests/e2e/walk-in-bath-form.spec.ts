@@ -38,6 +38,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test 2: Validate ZIP code contains exactly 5 digits (Equivalence Partitioning)
    * Requirements: ZIP code must be exactly 5 digits
    * Test cases: Valid (5 digits), Too short (< 5 digits), Too long (> 5 digits)
+   * Form Step: 1 - ZIP Code Entry
    */
   for (const testCase of zipCodeTestCases) {
     test(`should validate ZIP code - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
@@ -54,57 +55,13 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   }
 
   /**
-   * Test 3: Validate email format matches valid email pattern
-   * Requirements: Email must match valid email pattern (user@domain.tld)
-   * Test cases: Valid format, Missing @, Missing domain, Missing TLD
-   * 
-   * NOTE: This entire test suite is marked with test.fixme() because
-   * it currently detects a bug where the form proceeds with invalid email format.
-   * These tests will be skipped in CI but remain as documentation of a known issue.
-   */
-  for (const testCase of emailTestCases) {
-    test.fixme(`should validate email format - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
-
-      await formPage.navigateToContactInfoStep();
-      await formPage.enterContactInfo(testData.valid.name, testCase.email);
-      await formPage.clickGoToEstimate();
-
-      if (testCase.shouldProceed) {
-        await formPage.expectEmailSuccess();
-      } else {
-        await formPage.expectEmailFailure(testCase.email);
-      }
-    });
-  }
-
-  /**
-   * Test 4: Validate phone number contains exactly 10 digits (Equivalence Partitioning)
-   * Requirements: Phone number must be exactly 10 digits
-   * Test cases: Valid (10 digits), Too short (9 digits)
-   * Note: "Too long" case is not testable - phone input automatically truncates to 10 digits
-   */
-  for (const testCase of phoneTestCases) {
-    test(`should validate phone number - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
-
-      await formPage.navigateToPhoneStep();
-      await formPage.enterPhoneNumber(testCase.phone);
-      await formPage.submitForm();
-
-      if (testCase.shouldProceed) {
-        await formPage.expectPhoneSuccess();
-      } else {
-        await formPage.expectPhoneFailure(testCase.phone);
-      }
-    });
-  }
-
-  /**
-   * Test 5: Validate interest checkboxes - at least one must be selected
+   * Test 3: Validate interest checkboxes - at least one must be selected
    * Requirements: At least one interest checkbox must be selected (business requirement)
    * Test cases: Positive (selecting each checkbox individually), Negative (no checkbox selected)
+   * Form Step: 2 - Interest Selection
    */
   for (const testCase of interestCheckboxTestCases) {
-    test.fixme(`should validate interest checkboxes - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
+    test(`should validate interest checkboxes - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
       await formPage.enterZipCode(testData.valid.zipCode);
       await formPage.clickNext();
       await formPage.verifyInterestStep();
@@ -131,35 +88,10 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   }
 
   /**
-   * Test 6: Validate name field - required and format validation
-   * Requirements: All text fields are mandatory, name should consist only of latin letters, apostrophes, underscores, dots and dashes
-   * Test cases: Empty, First name only, Full name, With numbers, With invalid special characters
-   */
-  for (const testCase of nameTestCases) {
-    test(`should validate name field - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
-
-      await formPage.navigateToContactInfoStep();
-      await formPage.enterContactInfo(testCase.name, testData.valid.email);
-      await formPage.clickGoToEstimate();
-
-      if (testCase.shouldProceed) {
-        await formPage.expectNameSuccess();
-      } else {
-        if (testCase.errorType === 'required') {
-          await formPage.expectFormStaysOnContactInfoStepWithNameError();
-        } else if (testCase.errorType === 'fullName') {
-          await formPage.expectFormStaysOnContactInfoStepWithNameFullNameError();
-        } else {
-          await formPage.expectFormStaysOnContactInfoStepWithNameFormatError();
-        }
-      }
-    });
-  }
-
-  /**
-   * Test 7: Validate property type radio button is required
+   * Test 4: Validate property type radio button is required
    * Requirements: All fields are required (property type must be selected)
    * Test cases: Positive (selecting each radio button), Negative (no radio button selected)
+   * Form Step: 3 - Property Type Selection
    */
   for (const testCase of propertyTypeTestCases) {
     test(`should validate property type radio button - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
@@ -184,6 +116,76 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
         await formPage.expectPropertyTypeSuccess();
       } else {
         await formPage.expectFormStaysOnPropertyTypeStep();
+      }
+    });
+  }
+
+  /**
+   * Test 5: Validate name field - required and format validation
+   * Requirements: All text fields are mandatory, name should consist only of latin letters, apostrophes, underscores, dots and dashes
+   * Test cases: Empty, First name only, Full name, With numbers, With invalid special characters
+   * Form Step: 4 - Contact Info (Name and Email)
+   */
+  for (const testCase of nameTestCases) {
+    test(`should validate name field - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
+
+      await formPage.navigateToContactInfoStep();
+      await formPage.enterContactInfo(testCase.name, testData.valid.email);
+      await formPage.clickGoToEstimate();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectNameSuccess();
+      } else {
+        if (testCase.errorType === 'required') {
+          await formPage.expectFormStaysOnContactInfoStepWithNameError();
+        } else if (testCase.errorType === 'fullName') {
+          await formPage.expectFormStaysOnContactInfoStepWithNameFullNameError();
+        } else {
+          await formPage.expectFormStaysOnContactInfoStepWithNameFormatError();
+        }
+      }
+    });
+  }
+
+  /**
+   * Test 6: Validate email format matches valid email pattern
+   * Requirements: Email must match valid email pattern (user@domain.tld)
+   * Test cases: Valid format, Missing @, Missing domain, Missing TLD
+   * Form Step: 4 - Contact Info (Name and Email)
+   */
+  for (const testCase of emailTestCases) {
+    test(`should validate email format - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
+
+      await formPage.navigateToContactInfoStep();
+      await formPage.enterContactInfo(testData.valid.name, testCase.email);
+      await formPage.clickGoToEstimate();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectEmailSuccess();
+      } else {
+        await formPage.expectEmailFailure(testCase.email);
+      }
+    });
+  }
+
+  /**
+   * Test 7: Validate phone number contains exactly 10 digits (Equivalence Partitioning)
+   * Requirements: Phone number must be exactly 10 digits
+   * Test cases: Valid (10 digits), Too short (9 digits)
+   * Note: "Too long" case is not testable - phone input automatically truncates to 10 digits
+   * Form Step: 5 - Phone Number Entry
+   */
+  for (const testCase of phoneTestCases) {
+    test(`should validate phone number - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
+
+      await formPage.navigateToPhoneStep();
+      await formPage.enterPhoneNumber(testCase.phone);
+      await formPage.submitForm();
+
+      if (testCase.shouldProceed) {
+        await formPage.expectPhoneSuccess();
+      } else {
+        await formPage.expectPhoneFailure(testCase.phone);
       }
     });
   }
