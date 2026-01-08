@@ -8,7 +8,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test 1: Complete multi-step form submission flow with valid data
    * Requirements: All fields required, ZIP (5 digits), Email (valid format), Phone (10 digits), Redirect to Thank you page
    */
-  test('should complete full form submission flow with valid data and redirect to Thank you page', async ({
+  test('should complete full form submission flow with valid data and redirect to Thank you page', { tag: ['@smoke', '@critical'] }, async ({
     formPage,
   }) => {
 
@@ -40,7 +40,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Valid (5 digits), Too short (< 5 digits), Too long (> 5 digits)
    */
   for (const testCase of zipCodeTestCases) {
-    test(`should validate ZIP code - ${testCase.description}`, async ({ formPage }) => {
+    test(`should validate ZIP code - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
 
       await formPage.enterZipCode(testCase.zipCode);
       await formPage.clickNext();
@@ -63,7 +63,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * These tests will be skipped in CI but remain as documentation of a known issue.
    */
   for (const testCase of emailTestCases) {
-    test.fixme(`should validate email format - ${testCase.description}`, async ({ formPage }) => {
+    test.fixme(`should validate email format - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
 
       await formPage.navigateToContactInfoStep();
       await formPage.enterContactInfo(testData.valid.name, testCase.email);
@@ -84,7 +84,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Note: "Too long" case is not testable - phone input automatically truncates to 10 digits
    */
   for (const testCase of phoneTestCases) {
-    test(`should validate phone number - ${testCase.description}`, async ({ formPage }) => {
+    test(`should validate phone number - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
 
       await formPage.navigateToPhoneStep();
       await formPage.enterPhoneNumber(testCase.phone);
@@ -104,7 +104,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Positive (selecting each checkbox individually), Negative (no checkbox selected)
    */
   for (const testCase of interestCheckboxTestCases) {
-    test.fixme(`should validate interest checkboxes - ${testCase.description}`, async ({ formPage }) => {
+    test.fixme(`should validate interest checkboxes - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
       await formPage.enterZipCode(testData.valid.zipCode);
       await formPage.clickNext();
       await formPage.verifyInterestStep();
@@ -136,7 +136,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Empty, First name only, Full name, With numbers, With invalid special characters
    */
   for (const testCase of nameTestCases) {
-    test(`should validate name field - ${testCase.description}`, async ({ formPage }) => {
+    test(`should validate name field - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
 
       await formPage.navigateToContactInfoStep();
       await formPage.enterContactInfo(testCase.name, testData.valid.email);
@@ -162,7 +162,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
    * Test cases: Positive (selecting each radio button), Negative (no radio button selected)
    */
   for (const testCase of propertyTypeTestCases) {
-    test(`should validate property type radio button - ${testCase.description}`, async ({ formPage }) => {
+    test(`should validate property type radio button - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
       await formPage.navigateToPropertyTypeStep();
       await formPage.verifyPropertyTypeStep();
       

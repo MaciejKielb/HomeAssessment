@@ -2,7 +2,7 @@ import { test, expect } from '@fixtures';
 
 test.describe('Video Playback Tests', () => {
 
-  test('should display videos visible to users', async ({ videoPage }) => {
+  test('should display videos visible to users', { tag: '@regression' }, async ({ videoPage }) => {
     const videoCount = await videoPage.getVideoCount();
     expect(videoCount).toBeGreaterThan(0);
 
