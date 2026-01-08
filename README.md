@@ -65,6 +65,34 @@ You can use the following commands to execute tests:
   yarn test:report
   ```
 
+### 🏷️ Running Tests by Tags
+
+Tests are organized with tags to allow selective execution:
+
+- **`@smoke`** - Critical smoke tests that verify core functionality
+- **`@regression`** - Regression tests that ensure existing features work correctly
+- **`@critical`** - Critical path tests that must pass before deployment
+- **`@accessibility`** - Accessibility tests (WCAG compliance)
+
+**Examples:**
+
+```bash
+# Run only smoke tests
+npx playwright test --grep @smoke
+
+# Run critical tests
+npx playwright test --grep @critical
+
+# Run regression tests
+npx playwright test --grep @regression
+
+# Run tests with multiple tags (OR logic)
+npx playwright test --grep "@smoke|@critical"
+
+# Exclude specific tags
+npx playwright test --grep-invert @accessibility
+```
+
 ## ⚙️ CI/CD & Caching
 
 The Continuous Integration (CI) pipeline is configured to speed up builds by caching dependencies and Playwright browsers.
