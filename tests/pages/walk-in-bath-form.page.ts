@@ -87,6 +87,26 @@ export class WalkInBathFormPage {
     await this.independenceCheckbox.check();
   }
 
+  async selectIndependenceCheckbox() {
+    await expect(this.independenceCheckbox).toBeVisible();
+    await this.independenceCheckbox.check();
+  }
+
+  async selectSafetyCheckbox() {
+    await expect(this.safetyCheckbox).toBeVisible();
+    await this.safetyCheckbox.check();
+  }
+
+  async selectTherapyCheckbox() {
+    await expect(this.therapyCheckbox).toBeVisible();
+    await this.therapyCheckbox.check();
+  }
+
+  async selectOtherCheckbox() {
+    await expect(this.otherCheckbox).toBeVisible();
+    await this.otherCheckbox.check();
+  }
+
   /**
    * Verify that we're on interest step
    * Checks that all interest checkboxes are visible
@@ -113,6 +133,14 @@ export class WalkInBathFormPage {
 
   async selectMobileHome() {
     await this.mobileHomeOption.check();
+  }
+
+  async selectOwnedHouse() {
+    await this.ownedHouseOption.check();
+  }
+
+  async selectRentalProperty() {
+    await this.rentalPropertyOption.check();
   }
 
   /**
@@ -163,6 +191,18 @@ export class WalkInBathFormPage {
     await expect(this.ownedHouseOption).not.toBeChecked();
     await expect(this.rentalPropertyOption).not.toBeChecked();
     await expect(this.mobileHomeOption).toBeChecked();
+  }
+
+  async verifyOwnedHouseSelected() {
+    await expect(this.ownedHouseOption).toBeChecked();
+    await expect(this.rentalPropertyOption).not.toBeChecked();
+    await expect(this.mobileHomeOption).not.toBeChecked();
+  }
+
+  async verifyRentalPropertySelected() {
+    await expect(this.ownedHouseOption).not.toBeChecked();
+    await expect(this.rentalPropertyOption).toBeChecked();
+    await expect(this.mobileHomeOption).not.toBeChecked();
   }
 
   async enterContactInfo(name: string, email: string) {
@@ -269,6 +309,19 @@ export class WalkInBathFormPage {
   }
 
   /**
+   * Verify that form proceeds to property type step when at least one interest checkbox is selected
+   * Expected: Property type radio buttons should be visible on next step, no error messages visible
+   */
+  async expectInterestSuccess() {
+    // Verify form proceeded to property type step (behavior: user sees property type options on next step)
+    await expect(this.ownedHouseOption).toBeVisible();
+    await expect(this.rentalPropertyOption).toBeVisible();
+    await expect(this.mobileHomeOption).toBeVisible();
+    // Verify that form did not stay on interest step
+    await expect(this.independenceCheckbox).not.toBeVisible();
+  }
+
+  /**
    * Verify that form stays on contact info step when name field is empty
    * Expected: Form should remain on contact info step with error message displayed
    */
@@ -327,6 +380,19 @@ export class WalkInBathFormPage {
     // Verify that form did not proceed to contact info step
     await expect(this.nameInput).not.toBeVisible();
     await expect(this.emailInput).not.toBeVisible();
+  }
+
+  /**
+   * Verify that form proceeds to contact info step when property type radio button is selected
+   * Expected: Contact info inputs should be visible on next step, no error messages visible
+   */
+  async expectPropertyTypeSuccess() {
+    // Verify form proceeded to contact info step (behavior: user sees name and email inputs on next step)
+    await expect(this.nameInput).toBeVisible();
+    await expect(this.emailInput).toBeVisible();
+    // Verify that form did not stay on property type step
+    await expect(this.ownedHouseOption).not.toBeVisible();
+    await expect(this.propertyTypeError).not.toBeVisible();
   }
 
 }

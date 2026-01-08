@@ -119,4 +119,65 @@ export const nameTestCases = [
   },
 ];
 
+/**
+ * Interest checkbox test cases
+ * Positive: Selecting each checkbox individually
+ * Negative: No checkbox selected
+ */
+export const interestCheckboxTestCases = [
+  {
+    description: 'Independence checkbox selected',
+    shouldProceed: true,
+    checkboxType: 'independence',
+  },
+  {
+    description: 'Safety checkbox selected',
+    shouldProceed: true,
+    checkboxType: 'safety',
+  },
+  {
+    description: 'Therapy checkbox selected',
+    shouldProceed: true,
+    checkboxType: 'therapy',
+  },
+  {
+    description: 'Other checkbox selected',
+    shouldProceed: true,
+    checkboxType: 'other',
+  },
+  {
+    description: 'no checkbox selected',
+    shouldProceed: false,
+    checkboxType: null,
+  },
+];
+
+/**
+ * Property type radio button test cases
+ * Positive: Selecting each radio button
+ * Negative: No radio button selected
+ */
+export const propertyTypeTestCases = [
+  {
+    description: 'Owned House/Condo selected',
+    shouldProceed: true,
+    propertyType: 'ownedHouse',
+  },
+  {
+    description: 'Rental Property selected',
+    shouldProceed: true,
+    propertyType: 'rentalProperty',
+  },
+  {
+    description: 'Mobile Home selected',
+    shouldProceed: true,
+    propertyType: 'mobileHome',
+  },
+  {
+    description: 'no radio button selected',
+    shouldProceed: false,
+    propertyType: null,
+  },
+];
+
 
