@@ -1,6 +1,6 @@
 import { test, expect } from '@fixtures';
 
-import { testData, zipCodeTestCases, emailTestCases, phoneTestCases, nameTestCases } from '@data/test-data';
+import { testData, zipCodeTestCases, emailTestCases, phoneTestCases, nameTestCases, interestCheckboxTestCases, propertyTypeTestCases } from '@data/test-data';
 
 test.describe('Walk-In Bath Form - Critical Tests', () => {
 
@@ -101,21 +101,34 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   /**
    * Test 5: Validate interest checkboxes - at least one must be selected
    * Requirements: At least one interest checkbox must be selected (business requirement)
-   * Expected: Form should block progression to next step if no checkbox is selected
-   * 
-   * NOTE: This test is marked with test.fixme() because it detects a bug:
-   * - Form allows progression without selecting any checkbox (should block progression)
-   * - Test will be enabled once the bug is fixed
-   * - Bug is documented in DEFECTS.md
+   * Test cases: Positive (selecting each checkbox individually), Negative (no checkbox selected)
    */
-  test.fixme('should block progression when no interest checkbox is selected', async ({ formPage }) => {
+  for (const testCase of interestCheckboxTestCases) {
+    test(`should validate interest checkboxes - ${testCase.description}`, async ({ formPage }) => {
+      await formPage.enterZipCode(testData.valid.zipCode);
+      await formPage.clickNext();
+      await formPage.verifyInterestStep();
+      
+      if (testCase.checkboxType === 'independence') {
+        await formPage.selectIndependenceCheckbox();
+      } else if (testCase.checkboxType === 'safety') {
+        await formPage.selectSafetyCheckbox();
+      } else if (testCase.checkboxType === 'therapy') {
+        await formPage.selectTherapyCheckbox();
+      } else if (testCase.checkboxType === 'other') {
+        await formPage.selectOtherCheckbox();
+      }
+      // If checkboxType is null, do nothing (negative test case)
+      
+      await formPage.clickNext();
 
-    await formPage.enterZipCode(testData.valid.zipCode);
-    await formPage.clickNext();
-    await formPage.verifyInterestStep();
-    await formPage.clickNext();
-    await formPage.expectFormStaysOnInterestStep();
-  });
+      if (testCase.shouldProceed) {
+        await formPage.expectInterestSuccess();
+      } else {
+        await formPage.expectFormStaysOnInterestStep();
+      }
+    });
+  }
 
   /**
    * Test 6: Validate name field - required and format validation
@@ -146,13 +159,32 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   /**
    * Test 7: Validate property type radio button is required
    * Requirements: All fields are required (property type must be selected)
-   * Expected: Form should block progression to next step if no property type radio button is selected
+   * Test cases: Positive (selecting each radio button), Negative (no radio button selected)
    */
-  test('should block progression when no property type radio button is selected', async ({ formPage }) => {
+  for (const testCase of propertyTypeTestCases) {
+    test(`should validate property type radio button - ${testCase.description}`, async ({ formPage }) => {
+      await formPage.navigateToPropertyTypeStep();
+      await formPage.verifyPropertyTypeStep();
+      
+      if (testCase.propertyType === 'ownedHouse') {
+        await formPage.selectOwnedHouse();
+        await formPage.verifyOwnedHouseSelected();
+      } else if (testCase.propertyType === 'rentalProperty') {
+        await formPage.selectRentalProperty();
+        await formPage.verifyRentalPropertySelected();
+      } else if (testCase.propertyType === 'mobileHome') {
+        await formPage.selectMobileHome();
+        await formPage.verifyMobileHomeSelected();
+      }
+      // If propertyType is null, do nothing (negative test case)
+      
+      await formPage.clickNext();
 
-    await formPage.navigateToPropertyTypeStep();
-    await formPage.verifyPropertyTypeStep();
-    await formPage.clickNext();
-    await formPage.expectFormStaysOnPropertyTypeStep();
-  });
+      if (testCase.shouldProceed) {
+        await formPage.expectPropertyTypeSuccess();
+      } else {
+        await formPage.expectFormStaysOnPropertyTypeStep();
+      }
+    });
+  }
 });
