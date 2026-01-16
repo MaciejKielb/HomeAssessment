@@ -1,6 +1,6 @@
 import { Page, Locator } from '@playwright/test';
-import { FormActions, InterestType, PropertyType } from './form-actions';
-import { FormAssertions } from './form-assertions';
+import { FormActions } from './form-actions';
+import { FormAssertions } from '../assertions/form-assertions';
 import { FormNavigation } from './form-navigation';
 
 /**
@@ -40,6 +40,8 @@ export class WalkInBathFormPage {
   readonly nameFormatError: Locator;
   readonly nameFullNameError: Locator;
   readonly propertyTypeError: Locator;
+  readonly emailError: Locator;
+  readonly interestError: Locator;
   
   // URL Patterns
   readonly thankYouPageUrl: RegExp;
@@ -72,57 +74,52 @@ export class WalkInBathFormPage {
     this.nameFormatError = this.form.getByText(/your name should consist only/i);
     this.nameFullNameError = this.form.getByText(/should contain both first and last name/i);
     this.propertyTypeError = this.form.getByText(/choose one of the variants/i);
+    // Error selectors for fields that don't display errors (used for bug detection)
+    this.emailError = this.form.getByText(/invalid email|wrong email|please enter a valid email/i);
+    this.interestError = this.form.getByText(/please select at least one interest|select at least one option/i);
     this.thankYouPageUrl = /\/thankyou/i;
 
-    this.actions = new FormActions(
-      this.zipInput,
-      this.nextButton,
-      this.independenceCheckbox,
-      this.safetyCheckbox,
-      this.therapyCheckbox,
-      this.otherCheckbox,
-      this.ownedHouseOption,
-      this.rentalPropertyOption,
-      this.mobileHomeOption,
-      this.nameInput,
-      this.emailInput,
-      this.goToEstimateButton,
-      this.phoneInput,
-      this.submitButton,
-    );
+    this.actions = new FormActions({
+      zipInput: this.zipInput,
+      nextButton: this.nextButton,
+      independenceCheckbox: this.independenceCheckbox,
+      safetyCheckbox: this.safetyCheckbox,
+      therapyCheckbox: this.therapyCheckbox,
+      otherCheckbox: this.otherCheckbox,
+      ownedHouseOption: this.ownedHouseOption,
+      rentalPropertyOption: this.rentalPropertyOption,
+      mobileHomeOption: this.mobileHomeOption,
+      nameInput: this.nameInput,
+      emailInput: this.emailInput,
+      goToEstimateButton: this.goToEstimateButton,
+      phoneInput: this.phoneInput,
+      submitButton: this.submitButton,
+    });
 
-    this.assertions = new FormAssertions(
-      this.page,
-      this.zipInput,
-      this.independenceCheckbox,
-      this.safetyCheckbox,
-      this.therapyCheckbox,
-      this.otherCheckbox,
-      this.ownedHouseOption,
-      this.rentalPropertyOption,
-      this.mobileHomeOption,
-      this.nameInput,
-      this.emailInput,
-      this.phoneInput,
-      this.zipCodeError,
-      this.phoneError,
-      this.missingNameError,
-      this.nameFormatError,
-      this.nameFullNameError,
-      this.propertyTypeError,
-      this.thankYouPageUrl,
-    );
+    this.assertions = new FormAssertions(this.page, {
+      zipInput: this.zipInput,
+      independenceCheckbox: this.independenceCheckbox,
+      safetyCheckbox: this.safetyCheckbox,
+      therapyCheckbox: this.therapyCheckbox,
+      otherCheckbox: this.otherCheckbox,
+      ownedHouseOption: this.ownedHouseOption,
+      rentalPropertyOption: this.rentalPropertyOption,
+      mobileHomeOption: this.mobileHomeOption,
+      nameInput: this.nameInput,
+      emailInput: this.emailInput,
+      phoneInput: this.phoneInput,
+      zipCodeError: this.zipCodeError,
+      phoneError: this.phoneError,
+      missingNameError: this.missingNameError,
+      nameFormatError: this.nameFormatError,
+      nameFullNameError: this.nameFullNameError,
+      propertyTypeError: this.propertyTypeError,
+      emailError: this.emailError,
+      interestError: this.interestError,
+      thankYouPageUrl: this.thankYouPageUrl,
+    });
 
     this.navigation = new FormNavigation(this.actions);
-  }
-
-  // ============================================================================
-  // Navigation
-  // ============================================================================
-
-  async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('load');
   }
 
   // ============================================================================
@@ -229,44 +226,44 @@ export class WalkInBathFormPage {
   // Verification Methods
   // ============================================================================
 
-  async verifyInterestStep() {
-    return this.assertions.verifyInterestStep();
+  async expectInterestStep() {
+    return this.assertions.expectInterestStep();
   }
 
-  async verifyInterestsSelected() {
-    return this.assertions.verifyInterestsSelected();
+  async expectInterestsSelected() {
+    return this.assertions.expectInterestsSelected();
   }
 
-  async verifyPropertyTypeOptionsEnabled() {
-    return this.assertions.verifyPropertyTypeOptionsEnabled();
+  async expectPropertyTypeOptionsEnabled() {
+    return this.assertions.expectPropertyTypeOptionsEnabled();
   }
 
-  async verifyPropertyTypeStep() {
-    return this.assertions.verifyPropertyTypeStep();
+  async expectPropertyTypeStep() {
+    return this.assertions.expectPropertyTypeStep();
   }
 
-  async verifyMobileHomeSelected() {
-    return this.assertions.verifyPropertyTypeSelected('mobileHome');
+  async expectMobileHomeSelected() {
+    return this.assertions.expectPropertyTypeSelected('mobileHome');
   }
 
-  async verifyOwnedHouseSelected() {
-    return this.assertions.verifyPropertyTypeSelected('ownedHouse');
+  async expectOwnedHouseSelected() {
+    return this.assertions.expectPropertyTypeSelected('ownedHouse');
   }
 
-  async verifyRentalPropertySelected() {
-    return this.assertions.verifyPropertyTypeSelected('rentalProperty');
+  async expectRentalPropertySelected() {
+    return this.assertions.expectPropertyTypeSelected('rentalProperty');
   }
 
-  async verifyPhoneFormatted() {
-    return this.assertions.verifyPhoneFormatted();
+  async expectPhoneFormatted() {
+    return this.assertions.expectPhoneFormatted();
   }
 
-  async verifyRedirectToThankYouPage() {
-    return this.assertions.verifyRedirectToThankYouPage();
+  async expectThankYouPage() {
+    return this.assertions.expectThankYouPage();
   }
 
-  async verifyNotOnThankYouPage() {
-    return this.assertions.verifyNotOnThankYouPage();
+  async expectNotOnThankYouPage() {
+    return this.assertions.expectNotOnThankYouPage();
   }
 
   // ============================================================================
@@ -289,7 +286,7 @@ export class WalkInBathFormPage {
     return this.assertions.expectEmailSuccess();
   }
 
-  async expectEmailFailure(email: string): Promise<void> {
+  async expectEmailFailure(): Promise<void> {
     return this.assertions.expectEmailFailure();
   }
 
@@ -298,7 +295,7 @@ export class WalkInBathFormPage {
   // ============================================================================
 
   async expectPhoneSuccess() {
-    return this.assertions.expectPhoneSuccess();
+    return this.assertions.expectThankYouPage();
   }
 
   async expectPhoneFailure(phone: string) {
@@ -310,7 +307,7 @@ export class WalkInBathFormPage {
   // ============================================================================
 
   async expectFormStaysOnInterestStep() {
-    return this.assertions.expectFormStaysOnInterestStep();
+    return this.assertions.expectStaysOnInterestStep();
   }
 
   async expectInterestSuccess() {
@@ -322,7 +319,7 @@ export class WalkInBathFormPage {
   // ============================================================================
 
   async expectFormStaysOnContactInfoStepWithNameError() {
-    return this.assertions.expectFormStaysOnContactInfoStepWithNameError();
+    return this.assertions.expectStaysOnContactInfoWithNameError();
   }
 
   async expectNameSuccess() {
@@ -330,11 +327,11 @@ export class WalkInBathFormPage {
   }
 
   async expectFormStaysOnContactInfoStepWithNameFormatError() {
-    return this.assertions.expectFormStaysOnContactInfoStepWithNameFormatError();
+    return this.assertions.expectStaysOnContactInfoWithNameFormatError();
   }
 
   async expectFormStaysOnContactInfoStepWithNameFullNameError() {
-    return this.assertions.expectFormStaysOnContactInfoStepWithNameFullNameError();
+    return this.assertions.expectStaysOnContactInfoWithNameFullNameError();
   }
 
   // ============================================================================
@@ -342,7 +339,7 @@ export class WalkInBathFormPage {
   // ============================================================================
 
   async expectFormStaysOnPropertyTypeStep() {
-    return this.assertions.expectFormStaysOnPropertyTypeStep();
+    return this.assertions.expectStaysOnPropertyTypeStep();
   }
 
   async expectPropertyTypeSuccess() {

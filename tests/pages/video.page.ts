@@ -9,11 +9,6 @@ export class VideoPage {
     this.videoElements = page.locator('video');
   }
 
-  async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('load');
-  }
-
   /**
    * Get count of video elements on the page
    */
