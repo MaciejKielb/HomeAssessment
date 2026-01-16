@@ -1,5 +1,12 @@
-import { Page, Locator, expect } from '@playwright/test';
+import { Page, Locator } from '@playwright/test';
+import { SliderActions } from './slider-actions';
+import { SliderAssertions } from '../assertions/slider-assertions';
+import { SliderActionsLocators, SliderAssertionsLocators } from '../types/slider-locators';
 
+/**
+ * Slider Page Object Model
+ * Orchestrates slider interactions by delegating to specialized modules
+ */
 export class SliderPage {
   readonly page: Page;
   readonly slider: Locator;
@@ -8,6 +15,9 @@ export class SliderPage {
   readonly slides: Locator;
   readonly activeSlide: Locator;
 
+  private readonly actions: SliderActions;
+  private readonly assertions: SliderAssertions;
+
   constructor(page: Page) {
     this.page = page;
     this.slider = page.locator('[data-main-slider]');
@@ -15,103 +25,130 @@ export class SliderPage {
     this.nextButton = this.page.getByRole('button', { name: 'Next', exact: true });
     this.slides = this.slider.locator('[data-slick-index]');
     this.activeSlide = this.slider.locator('[data-slick-index].slick-active.slick-current');
+
+    const actionsLocators: SliderActionsLocators = {
+      prevButton: this.prevButton,
+      nextButton: this.nextButton,
+      slides: this.slides,
+      activeSlide: this.activeSlide,
+    };
+
+    const assertionsLocators: SliderAssertionsLocators = {
+      slider: this.slider,
+      prevButton: this.prevButton,
+      nextButton: this.nextButton,
+      slides: this.slides,
+      activeSlide: this.activeSlide,
+    };
+
+    this.assertions = new SliderAssertions(assertionsLocators);
+    this.actions = new SliderActions(actionsLocators, this.assertions);
   }
 
-  async isSliderVisible(): Promise<boolean> {
-    return await this.slider.isVisible();
+  /**
+   * Verify that slider is visible
+   */
+  async expectSliderVisible(): Promise<void> {
+    return this.assertions.expectSliderVisible();
   }
 
+  /**
+   * Verify that navigation buttons are visible
+   */
+  async expectNavigationButtonsVisible(): Promise<void> {
+    return this.assertions.expectNavigationButtonsVisible();
+  }
+
+  /**
+   * Verify that slide count matches expected value
+   */
+  async expectSlideCount(expectedCount: number): Promise<void> {
+    return this.assertions.expectSlideCount(expectedCount);
+  }
+
+  /**
+   * Verify that active slide has the expected index
+   */
+  async expectActiveSlideIndex(expectedIndex: number): Promise<void> {
+    return this.assertions.expectActiveSlideIndex(expectedIndex);
+  }
+
+  /**
+   * Verify that all slide images are loaded
+   */
+  async expectAllImagesLoaded(): Promise<void> {
+    return this.assertions.expectAllImagesLoaded();
+  }
+
+  // ============================================================================
+  // Action Methods (delegated to SliderActions)
+  // ============================================================================
+
+  /**
+   * Get the total number of slides
+   */
   async getSlideCount(): Promise<number> {
-    return await this.slides.count();
+    return this.actions.getSlideCount();
   }
 
+  /**
+   * Get the index of the currently active slide
+   */
   async getActiveSlideIndex(): Promise<number> {
-    const index = await this.activeSlide.getAttribute('data-slick-index');
-    return index ? parseInt(index, 10) : -1;
+    return this.actions.getActiveSlideIndex();
   }
 
-  private async waitForActiveIndex(expectedIndex: number): Promise<void> {
-    await expect(this.activeSlide).toHaveAttribute('data-slick-index', String(expectedIndex));
-  }
-
+  /**
+   * Click the Next button to navigate to the next slide
+   */
   async clickNext(): Promise<void> {
-    const currentIndex = await this.getActiveSlideIndex();
-    const slideCount = await this.getSlideCount();
-    if (slideCount === 0) throw new Error('No slides available');
-    const expectedIndex = (currentIndex + 1) % slideCount;
-
-    await expect(this.nextButton).toBeEnabled();
-    await this.nextButton.click();
-    // Wait for slider transition to complete by checking the active slide index changes
-    await this.waitForActiveIndex(expectedIndex);
+    return this.actions.clickNext();
   }
 
+  /**
+   * Click the Previous button to navigate to the previous slide
+   */
   async clickPrevious(): Promise<void> {
-    const currentIndex = await this.getActiveSlideIndex();
-    const slideCount = await this.getSlideCount();
-    if (slideCount === 0) throw new Error('No slides available');
-    const expectedIndex = (currentIndex - 1 + slideCount) % slideCount;
-
-    await expect(this.prevButton).toBeEnabled();
-    await this.prevButton.click();
-    // Wait for slider transition to complete by checking the active slide index changes
-    await this.waitForActiveIndex(expectedIndex);
+    return this.actions.clickPrevious();
   }
 
-  async verifyNavigationButtonsVisible(): Promise<void> {
-    await expect(this.prevButton).toBeVisible();
-    await expect(this.nextButton).toBeVisible();
-  }
-
-  async verifyAllImagesLoaded(): Promise<void> {
-    const slideCount = await this.getSlideCount();
-    
-    for (let i = 0; i < slideCount; i++) {
-      const slide = this.slides.nth(i);
-      const image = slide.locator('img');
-      
-      await expect(image).toBeVisible();
-    }
-  }
-
+  /**
+   * Navigate to a specific slide by index
+   */
   async navigateToSlide(targetIndex: number): Promise<void> {
-    const currentIndex = await this.getActiveSlideIndex();
-    const slideCount = await this.getSlideCount();
-    
-    if (targetIndex < 0 || targetIndex >= slideCount) {
-      throw new Error(`Target slide index ${targetIndex} is out of range (0-${slideCount - 1})`);
-    }
-    
-    const steps = targetIndex - currentIndex;
-    
-    if (steps > 0) {
-      for (let i = 0; i < steps; i++) {
-        await this.clickNext();
-      }
-    } else if (steps < 0) {
-      for (let i = 0; i < Math.abs(steps); i++) {
-        await this.clickPrevious();
-      }
-    }
+    return this.actions.navigateToSlide(targetIndex);
   }
 
-  async verifyCanNavigateThroughAllSlides(): Promise<void> {
+  /**
+   * Verify that slider can navigate through all slides
+   * This method performs navigation actions and verifies the result
+   */
+  async expectCanNavigateThroughAllSlides(): Promise<void> {
     const slideCount = await this.getSlideCount();
     
     for (let i = 0; i < slideCount; i++) {
       await this.navigateToSlide(i);
+      // Verify we're on the correct slide
+      await this.expectActiveSlideIndex(i);
     }
   }
 
-  async verifyCircularNavigation(): Promise<void> {
+  /**
+   * Verify that slider supports circular navigation (wraps around)
+   * This method performs navigation actions and verifies the result
+   */
+  async expectCircularNavigation(): Promise<void> {
     const slideCount = await this.getSlideCount();
     
     if (slideCount < 2) return;
     
     await this.navigateToSlide(0);
     
+    // Navigate through all slides and verify we wrap around
     for (let i = 0; i < slideCount; i++) {
       await this.clickNext();
+      const expectedIndex = (i + 1) % slideCount;
+      await this.expectActiveSlideIndex(expectedIndex);
     }
   }
 }
