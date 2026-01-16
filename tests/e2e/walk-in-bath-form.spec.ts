@@ -16,22 +16,22 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
     await formPage.clickNext();
 
     await formPage.selectAllInterests();
-    await formPage.verifyInterestsSelected();
+    await formPage.expectInterestsSelected();
     await formPage.clickNext();
 
-    await formPage.verifyPropertyTypeOptionsEnabled();
+    await formPage.expectPropertyTypeOptionsEnabled();
     await formPage.selectMobileHome();
-    await formPage.verifyMobileHomeSelected();
+    await formPage.expectMobileHomeSelected();
     await formPage.clickNext();
 
     await formPage.enterContactInfo(testData.valid.name, testData.valid.email);
     await formPage.clickGoToEstimate();
 
     await formPage.enterPhoneNumber(testData.valid.phone);
-    await formPage.verifyPhoneFormatted();
+    await formPage.expectPhoneFormatted();
     await formPage.submitForm();
 
-    await formPage.verifyRedirectToThankYouPage();
+    await formPage.expectThankYouPage();
   });
 
   /**
@@ -64,7 +64,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
     test(`should validate interest checkboxes - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
       await formPage.enterZipCode(testData.valid.zipCode);
       await formPage.clickNext();
-      await formPage.verifyInterestStep();
+      await formPage.expectInterestStep();
       
       if (testCase.checkboxType === 'independence') {
         await formPage.selectIndependenceCheckbox();
@@ -96,17 +96,17 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
   for (const testCase of propertyTypeTestCases) {
     test(`should validate property type radio button - ${testCase.description}`, { tag: testCase.shouldProceed ? ['@critical', '@happy-path'] : ['@negative', '@regression'] }, async ({ formPage }) => {
       await formPage.navigateToPropertyTypeStep();
-      await formPage.verifyPropertyTypeStep();
+      await formPage.expectPropertyTypeStep();
       
       if (testCase.propertyType === 'ownedHouse') {
         await formPage.selectOwnedHouse();
-        await formPage.verifyOwnedHouseSelected();
+        await formPage.expectOwnedHouseSelected();
       } else if (testCase.propertyType === 'rentalProperty') {
         await formPage.selectRentalProperty();
-        await formPage.verifyRentalPropertySelected();
+        await formPage.expectRentalPropertySelected();
       } else if (testCase.propertyType === 'mobileHome') {
         await formPage.selectMobileHome();
-        await formPage.verifyMobileHomeSelected();
+        await formPage.expectMobileHomeSelected();
       }
       // If propertyType is null, do nothing (negative test case)
       
@@ -163,7 +163,7 @@ test.describe('Walk-In Bath Form - Critical Tests', () => {
       if (testCase.shouldProceed) {
         await formPage.expectEmailSuccess();
       } else {
-        await formPage.expectEmailFailure(testCase.email);
+        await formPage.expectEmailFailure();
       }
     });
   }

@@ -29,7 +29,8 @@ export const test = base.extend<CustomFixtures>({
    */
   formPage: async ({ page }, use) => {
     const formPage = new WalkInBathFormPage(page);
-    await formPage.goto();
+    await page.goto('/');
+    await page.waitForLoadState('load');
     await use(formPage);
   },
 
@@ -39,7 +40,9 @@ export const test = base.extend<CustomFixtures>({
    */
   sliderPage: async ({ page }, use) => {
     const sliderPage = new SliderPage(page);
-    await sliderPage.goto();
+    await page.goto('/');
+    await page.waitForLoadState('load');
+    await sliderPage.slider.waitFor({ state: 'visible' });
     await use(sliderPage);
   },
 
@@ -49,7 +52,8 @@ export const test = base.extend<CustomFixtures>({
    */
   videoPage: async ({ page }, use) => {
     const videoPage = new VideoPage(page);
-    await videoPage.goto();
+    await page.goto('/');
+    await page.waitForLoadState('load');
     await use(videoPage);
   },
 });

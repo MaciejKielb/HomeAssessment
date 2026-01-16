@@ -1,4 +1,5 @@
 import { Locator, expect } from '@playwright/test';
+import { FormActionsLocators } from '../types/form-locators';
 
 /**
  * Form action methods - handles all user interactions with form elements
@@ -8,50 +9,30 @@ export type InterestType = 'independence' | 'safety' | 'therapy' | 'other';
 export type PropertyType = 'ownedHouse' | 'rentalProperty' | 'mobileHome';
 
 export class FormActions {
-  constructor(
-    private zipInput: Locator,
-    private nextButton: Locator,
-    private independenceCheckbox: Locator,
-    private safetyCheckbox: Locator,
-    private therapyCheckbox: Locator,
-    private otherCheckbox: Locator,
-    private ownedHouseOption: Locator,
-    private rentalPropertyOption: Locator,
-    private mobileHomeOption: Locator,
-    private nameInput: Locator,
-    private emailInput: Locator,
-    private goToEstimateButton: Locator,
-    private phoneInput: Locator,
-    private submitButton: Locator,
-  ) {}
+  constructor(private locators: FormActionsLocators) {}
 
   /**
    * Enter ZIP code into the form
    */
   async enterZipCode(zipCode: string): Promise<void> {
-    await this.zipInput.fill(zipCode);
+    await this.locators.zipInput.fill(zipCode);
   }
 
   /**
    * Click the Next button
    */
   async clickNext(): Promise<void> {
-    await this.nextButton.click();
+    await this.locators.nextButton.click();
   }
 
   /**
    * Select all interest checkboxes
-   * Waits for each checkbox to be visible before clicking (important for Firefox)
    */
   async selectAllInterests(): Promise<void> {
-    await expect(this.independenceCheckbox).toBeVisible();
-    await this.independenceCheckbox.check();
-    await expect(this.safetyCheckbox).toBeVisible();
-    await this.safetyCheckbox.check();
-    await expect(this.therapyCheckbox).toBeVisible();
-    await this.therapyCheckbox.check();
-    await expect(this.otherCheckbox).toBeVisible();
-    await this.otherCheckbox.check();
+    const allInterestTypes: InterestType[] = ['independence', 'safety', 'therapy', 'other'];
+    for (const interestType of allInterestTypes) {
+      await this.getInterestCheckbox(interestType).check();
+    }
   }
 
   /**
@@ -59,8 +40,7 @@ export class FormActions {
    * Used when testing accessibility or when only minimum requirement is needed
    */
   async selectAtLeastOneInterest(): Promise<void> {
-    await expect(this.independenceCheckbox).toBeVisible();
-    await this.independenceCheckbox.check();
+    await this.locators.independenceCheckbox.check();
   }
 
   /**
@@ -68,7 +48,6 @@ export class FormActions {
    */
   async selectInterestCheckbox(type: InterestType): Promise<void> {
     const checkbox = this.getInterestCheckbox(type);
-    await expect(checkbox).toBeVisible();
     await checkbox.check();
   }
 
@@ -78,13 +57,13 @@ export class FormActions {
   private getInterestCheckbox(type: InterestType): Locator {
     switch (type) {
       case 'independence':
-        return this.independenceCheckbox;
+        return this.locators.independenceCheckbox;
       case 'safety':
-        return this.safetyCheckbox;
+        return this.locators.safetyCheckbox;
       case 'therapy':
-        return this.therapyCheckbox;
+        return this.locators.therapyCheckbox;
       case 'other':
-        return this.otherCheckbox;
+        return this.locators.otherCheckbox;
     }
   }
 
@@ -102,11 +81,11 @@ export class FormActions {
   private getPropertyTypeOption(type: PropertyType): Locator {
     switch (type) {
       case 'ownedHouse':
-        return this.ownedHouseOption;
+        return this.locators.ownedHouseOption;
       case 'rentalProperty':
-        return this.rentalPropertyOption;
+        return this.locators.rentalPropertyOption;
       case 'mobileHome':
-        return this.mobileHomeOption;
+        return this.locators.mobileHomeOption;
     }
   }
 
@@ -114,18 +93,20 @@ export class FormActions {
    * Enter contact information (name and email)
    */
   async enterContactInfo(name: string, email: string): Promise<void> {
-    await expect(this.nameInput).toBeEnabled();
-    await expect(this.emailInput).toBeEnabled();
-    await this.nameInput.fill(name);
-    await this.emailInput.fill(email);
+    const inputs = [this.locators.nameInput, this.locators.emailInput];
+    for (const input of inputs) {
+      await expect(input).toBeEnabled();
+    }
+    await this.locators.nameInput.fill(name);
+    await this.locators.emailInput.fill(email);
   }
 
   /**
    * Click the "Go to Estimate" button
    */
   async clickGoToEstimate(): Promise<void> {
-    await expect(this.goToEstimateButton).toBeEnabled();
-    await this.goToEstimateButton.click();
+    await expect(this.locators.goToEstimateButton).toBeEnabled();
+    await this.locators.goToEstimateButton.click();
   }
 
   /**
@@ -133,8 +114,8 @@ export class FormActions {
    * Uses evaluate to set value and trigger all formatting events (works in all browsers)
    */
   async enterPhoneNumber(phone: string): Promise<void> {
-    await expect(this.phoneInput).toBeEnabled();
-    await this.phoneInput.evaluate((el: any, value: string) => {
+    await expect(this.locators.phoneInput).toBeEnabled();
+    await this.locators.phoneInput.evaluate((el: any, value: string) => {
       el.value = value;
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
@@ -146,7 +127,7 @@ export class FormActions {
    * Submit the form
    */
   async submitForm(): Promise<void> {
-    await expect(this.submitButton).toBeEnabled();
-    await this.submitButton.click();
+    await expect(this.locators.submitButton).toBeEnabled();
+    await this.locators.submitButton.click();
   }
 }

@@ -17,12 +17,6 @@ export class SliderPage {
     this.activeSlide = this.slider.locator('[data-slick-index].slick-active.slick-current');
   }
 
-  async goto() {
-    await this.page.goto('/');
-    await this.page.waitForLoadState('load');
-    await this.slider.waitFor({ state: 'visible' });
-  }
-
   async isSliderVisible(): Promise<boolean> {
     return await this.slider.isVisible();
   }
@@ -46,10 +40,9 @@ export class SliderPage {
     if (slideCount === 0) throw new Error('No slides available');
     const expectedIndex = (currentIndex + 1) % slideCount;
 
-    await expect(this.nextButton).toBeVisible();
     await expect(this.nextButton).toBeEnabled();
     await this.nextButton.click();
-    await this.page.waitForTimeout(600); // allow slider transition to settle
+    // Wait for slider transition to complete by checking the active slide index changes
     await this.waitForActiveIndex(expectedIndex);
   }
 
@@ -59,10 +52,9 @@ export class SliderPage {
     if (slideCount === 0) throw new Error('No slides available');
     const expectedIndex = (currentIndex - 1 + slideCount) % slideCount;
 
-    await expect(this.prevButton).toBeVisible();
     await expect(this.prevButton).toBeEnabled();
     await this.prevButton.click();
-    await this.page.waitForTimeout(600); // allow slider transition to settle
+    // Wait for slider transition to complete by checking the active slide index changes
     await this.waitForActiveIndex(expectedIndex);
   }
 
